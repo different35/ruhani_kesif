@@ -28,45 +28,63 @@ ANTARDASHA_ORDER = {
 }
 
 
-def balance_years(moon_sidereal_lon: float, years_per_dasha: float) -> float:
-    """Ay'ın içinde bulunduğu nakshatranın tamamlanmamış fraction'ı kalan süreyi verir."""
+def balance_years(moon_sidereal_lon: float, years_per_dasha: float = None):
+    """Vimshottari balanca kuralı — PyJHora `vimsottari_dasha_start_date` ile birebir
+    (kaynak: jhora/horoscope/dhasa/graha/vimsottari.py, AGPL referans davranışı):
+
+      current_lord = Ay'ın İÇİNDE olduğu nakshatra'nın lordu (Swati -> Rahu)
+      frac_elapsed = nakshatra içinde geçilen oran
+      balance      = next_lord_years * frac_elapsed     <-- JYOTISH STANDARDI
+      start_lord   = next_lord (Rahu sonrası -> Jupiter)
+
+    Gist §3 "aboneliğin omurgası" dediği için bu fonksiyon kritik yol: önceki
+    sürümde `current_full * (1-frac)` kullanılıyordu (yanlış formül; Swati örneğinde
+    0.72 yıl yerine 15.36 yıl çıkmalı). Düzeltme + golden test eklendi.
+    """
     span = 360.0 / len(NAKSHATRAS)
-    idx = int((moon_sidereal_lon % 360.0) / span)
-    within = (moon_sidereal_lon % 360.0) - idx * span
-    frac_elapsed = within / span            # 0..1 geçilen kısım
-    lord_start = idx % 9                    # nakshatra lordu (Ashwini=Ketu ...)
-    full = YEARS[LORDS[lord_start]]
-    return full * (1.0 - frac_elapsed), LORDS[lord_start]
+    lon = moon_sidereal_lon % 360.0
+    idx = int(lon / span)
+    frac_elapsed = (lon - idx * span) / span   # 0..1 geçilen kısım
+    current_lord = LORDS[idx % 9]              # Ashwini=Ketu ... Revati=Mercury
+    next_lord = LORDS[(idx % 9) + 1 if (idx % 9) + 1 < 9 else 0]
+    balance = YEARS[next_lord] * frac_elapsed
+    return balance, next_lord, current_lord
 
 
 def vimshottari(moon_sidereal_lon: float, birth_jd_ut: float) -> list[dict]:
     """Doğumdan 120 yıl sonrasına MD+AD takvimi (julian day UT cinsinden)."""
     import swisseph as swe
-    rem_years, start_lord = balance_years(moon_sidereal_lon, None)
+    rem_years, start_lord, _current_lord = balance_years(moon_sidereal_lon)
     lord_i = LORDS.index(start_lord)
     md_list = []
-    # Tam döngü: balancalı ilk MD'dan sonra 120 yılı tamamlamak için 10 MD gerekir
-    # (son MD'ın balance'a kadar olan kısmı kesilir).
-    seq = [LORDS[(lord_i + k) % 9] for k in range(10)]
+    # PyJHora `vimsottari_mahadasa` ile birebir: 9 MD döner; ilki BALANCA süresiyle
+    # açılır, kalan 8'i tam. (Eski sürümde 10. MD eklenip sonu kırpılıyordu ->
+    # timeline 120 yıl yerine ~137 yıla taşıyordu. Düzeltme: P1-5 regresyon testi.)
+    seq = [LORDS[(lord_i + k) % 9] for k in range(9)]
     durations = [rem_years] + [YEARS[s] for s in seq[1:]]
     cursor = birth_jd_ut
-    prev_lord = seq[-1]  # balance kesintisi: başlangıç MD'ının ilk AD'sı kırpılır
+    YEAR = 365.2425  # sidereal year (gist/PyJHora: const.sidereal_year)
     for i_md, (lord, yrs) in enumerate(zip(seq, durations)):
-        start, end = cursor, cursor + yrs * 365.2425
+        start, end = cursor, cursor + yrs * YEAR
         sub_seq = ANTARDASHA_ORDER[lord]
-        sub_cursor = start
+        # PyJHora `_vimsottari_bhukti` ile birebir: AD sırası her MD'da MD lorduyla
+        # BAŞLAR (option=1). Balanca kırpması = ilk AD'ın tüketilen kısmı kadar kaydır.
+        first_full = YEARS[lord] * YEARS[sub_seq[0]] / 120.0
+        consumed_frac = 1.0 - yrs / YEARS[lord] if i_md == 0 else 0.0
+        sub_cursor = start + consumed_frac * first_full * YEAR
         for si, sub in enumerate(sub_seq):
             sub_yrs = yrs * YEARS[sub] / 120.0
-            if si == 0 and i_md == 0:
-                full_sub = YEARS[lord] * YEARS[sub] / 120.0
-                skipped = full_sub - sub_yrs      # doğumdan önce tüketilen AD parçası
-                sub_cursor += skipped * 365.2425
-            seg_end = min(sub_cursor + sub_yrs * 365.2425, end)
+            seg_end = min(sub_cursor + sub_yrs * YEAR, end)
             if seg_end > sub_cursor:
                 md_list.append({"mahadasha": lord, "antardasha": sub,
                                 "start_utc": swe.revjul(sub_cursor, 1)[:3],
                                 "end_utc": swe.revjul(seg_end, 1)[:3],
-                                "years": round((seg_end - sub_cursor) / 365.2425, 3)})
+                                "years": round((seg_end - sub_cursor) / YEAR, 3)})
             sub_cursor = seg_end
         cursor = end
     return md_list
+
+
+def yrs_full(lord: str) -> float:
+    """MD'ın tam (kırpılmamış) yılı — balance hesabında referans."""
+    return YEARS[lord]
