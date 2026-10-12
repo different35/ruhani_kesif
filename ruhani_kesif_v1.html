@@ -1,0 +1,1583 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ruhani Keşif - Esma-ül Hüsna & Astroloji & El Falı</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.0/index.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/amiri@5.0.0/index.css">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .font-amiri { font-family: 'Amiri', serif; }
+        
+        body {
+            background: linear-gradient(135deg, #0a0e27 0%, #1a1040 30%, #0d1b3e 60%, #0a0e27 100%);
+            min-height: 100vh;
+        }
+
+        .geometric-bg {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0; opacity: 0.03;
+            background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 0L80 40L40 80L0 40Z' fill='none' stroke='%23d4af37' stroke-width='0.5'/%3E%3Cpath d='M40 10L70 40L40 70L10 40Z' fill='none' stroke='%23d4af37' stroke-width='0.5'/%3E%3C/svg%3E");
+            pointer-events: none; z-index: 0;
+        }
+
+        .glass-card {
+            background: rgba(255,255,255,0.04); backdrop-filter: blur(20px);
+            border: 1px solid rgba(212,175,55,0.15);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05);
+        }
+        .glass-card-light {
+            background: rgba(255,255,255,0.06); backdrop-filter: blur(12px);
+            border: 1px solid rgba(212,175,55,0.1);
+        }
+        .gold-gradient { background: linear-gradient(135deg, #d4af37, #f4d03f, #d4af37); }
+        .gold-text {
+            background: linear-gradient(135deg, #d4af37, #f4d03f, #e6c547);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .input-field {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.2);
+            color: #e8e8e8; transition: all 0.3s ease;
+        }
+        .input-field:focus {
+            border-color: #d4af37; box-shadow: 0 0 20px rgba(212,175,55,0.15);
+            outline: none; background: rgba(255,255,255,0.08);
+        }
+        .input-field::placeholder { color: rgba(255,255,255,0.3); }
+        .btn-primary {
+            background: linear-gradient(135deg, #d4af37, #b8941f); color: #0a0e27;
+            font-weight: 700; transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(212,175,55,0.3);
+        }
+        .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 25px rgba(212,175,55,0.4); }
+        .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+        .btn-secondary {
+            background: rgba(255,255,255,0.08); border: 1px solid rgba(212,175,55,0.3);
+            color: #d4af37; transition: all 0.3s ease;
+        }
+        .btn-secondary:hover { background: rgba(212,175,55,0.1); border-color: #d4af37; }
+
+        .step-indicator { transition: all 0.5s ease; }
+        .step-active { background: linear-gradient(135deg, #d4af37, #f4d03f); color: #0a0e27; box-shadow: 0 0 20px rgba(212,175,55,0.4); }
+        .step-completed { background: rgba(212,175,55,0.2); color: #d4af37; border: 1px solid rgba(212,175,55,0.4); }
+        .step-pending { background: rgba(255,255,255,0.05); color: rgba(255,255,255,0.3); border: 1px solid rgba(255,255,255,0.1); }
+        .progress-line { background: rgba(255,255,255,0.1); }
+        .progress-fill { background: linear-gradient(90deg, #d4af37, #f4d03f); transition: width 0.5s ease; }
+        .wizard-step { animation: fadeInUp 0.5s ease forwards; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulse-glow { 0%,100% { box-shadow: 0 0 20px rgba(212,175,55,0.2); } 50% { box-shadow: 0 0 40px rgba(212,175,55,0.4); } }
+        .pulse-glow { animation: pulse-glow 3s ease-in-out infinite; }
+        @keyframes float { 0%,100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+        .float-anim { animation: float 6s ease-in-out infinite; }
+        .star-field { position: fixed; top: 0; left: 0; right: 0; bottom: 0; pointer-events: none; z-index: 0; }
+        .star { position: absolute; width: 2px; height: 2px; background: rgba(212,175,55,0.5); border-radius: 50%; animation: twinkle 3s ease-in-out infinite; }
+        @keyframes twinkle { 0%,100% { opacity: 0.2; } 50% { opacity: 0.8; } }
+
+        .esma-card {
+            background: linear-gradient(135deg, rgba(212,175,55,0.08), rgba(139,92,246,0.05));
+            border: 1px solid rgba(212,175,55,0.2); transition: all 0.3s ease;
+        }
+        .tab-btn { transition: all 0.3s ease; border-bottom: 2px solid transparent; }
+        .tab-btn.active { border-bottom-color: #d4af37; color: #d4af37; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+        .loading-spinner { border: 3px solid rgba(212,175,55,0.2); border-top: 3px solid #d4af37; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .ornament-line { height: 1px; background: linear-gradient(90deg, transparent, rgba(212,175,55,0.4), transparent); }
+        .select-field { background: rgba(255,255,255,0.05); border: 1px solid rgba(212,175,55,0.2); color: #e8e8e8; transition: all 0.3s ease; }
+        .select-field:focus { border-color: #d4af37; box-shadow: 0 0 20px rgba(212,175,55,0.15); outline: none; }
+        .select-field option { background: #1a1040; color: #e8e8e8; }
+        .info-badge { background: rgba(212,175,55,0.1); border: 1px solid rgba(212,175,55,0.2); color: #d4af37; }
+        .phone-input-group { display: flex; gap: 8px; }
+        .result-section { border-left: 3px solid rgba(212,175,55,0.4); padding-left: 16px; }
+
+        .ai-response-card {
+            background: linear-gradient(135deg, rgba(139,92,246,0.08), rgba(212,175,55,0.05));
+            border: 1px solid rgba(139,92,246,0.2); border-radius: 16px; padding: 20px; margin-bottom: 16px;
+        }
+        .ai-thinking { display: flex; align-items: center; gap: 8px; color: #a78bfa; font-size: 13px; }
+        .ai-thinking-dot { width: 6px; height: 6px; border-radius: 50%; background: #a78bfa; animation: thinkingPulse 1.4s ease-in-out infinite; }
+        .ai-thinking-dot:nth-child(2) { animation-delay: 0.2s; }
+        .ai-thinking-dot:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes thinkingPulse { 0%,100% { opacity: 0.3; transform: scale(0.8); } 50% { opacity: 1; transform: scale(1.2); } }
+
+        /* Upload Zone */
+        .upload-zone {
+            border: 2px dashed rgba(212,175,55,0.3); border-radius: 16px;
+            padding: 40px 20px; text-align: center; cursor: pointer;
+            transition: all 0.3s ease; position: relative; overflow: hidden;
+        }
+        .upload-zone:hover, .upload-zone.dragover {
+            border-color: #d4af37; background: rgba(212,175,55,0.05);
+        }
+        .upload-zone.has-image { border-style: solid; border-color: rgba(212,175,55,0.4); padding: 12px; }
+        .upload-preview { max-height: 300px; border-radius: 12px; object-fit: contain; }
+        
+        /* Palmistry Result Cards */
+        .palm-line-card {
+            background: linear-gradient(135deg, rgba(212,175,55,0.06), rgba(139,92,246,0.04));
+            border: 1px solid rgba(212,175,55,0.15); border-radius: 12px; padding: 16px;
+            transition: all 0.3s ease;
+        }
+        .palm-line-card:hover { border-color: rgba(212,175,55,0.4); transform: translateY(-2px); }
+
+        .line-indicator {
+            width: 100%; height: 4px; border-radius: 2px; margin: 8px 0;
+        }
+        .line-strength-bar {
+            height: 6px; border-radius: 3px; transition: width 1s ease;
+        }
+
+        /* Structured output */
+        .structured-json {
+            background: rgba(0,0,0,0.4); border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 12px; font-family: 'Courier New', monospace; font-size: 11px;
+            color: #22c55e; padding: 16px; max-height: 400px; overflow-y: auto;
+            white-space: pre-wrap; word-break: break-all;
+        }
+
+        /* Analysis progress */
+        .analysis-step {
+            display: flex; align-items: center; gap: 12px; padding: 8px 0;
+            opacity: 0.3; transition: all 0.5s ease;
+        }
+        .analysis-step.active { opacity: 1; }
+        .analysis-step.completed { opacity: 0.7; }
+        .analysis-step-dot {
+            width: 10px; height: 10px; border-radius: 50%;
+            background: rgba(255,255,255,0.2); transition: all 0.3s ease;
+        }
+        .analysis-step.active .analysis-step-dot { background: #d4af37; box-shadow: 0 0 10px rgba(212,175,55,0.5); }
+        .analysis-step.completed .analysis-step-dot { background: #22c55e; }
+    </style>
+</head>
+<body class="text-white overflow-x-hidden">
+    <div class="geometric-bg"></div>
+    <div class="star-field" id="starField"></div>
+
+    <div class="relative z-10 min-h-screen">
+        <!-- Header -->
+        <header class="pt-6 pb-4 px-4">
+            <div class="max-w-6xl mx-auto flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl gold-gradient flex items-center justify-center">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#0a0e27" stroke-width="2">
+                            <polygon points="12,2 15.09,8.26 22,9.27 17,14.14 18.18,21.02 12,17.77 5.82,21.02 7,14.14 2,9.27 8.91,8.26"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <h1 class="text-lg font-bold gold-text">Ruhani Keşif</h1>
+                        <p class="text-xs text-gray-400">Esma-ül Hüsna • Astroloji • El Falı</p>
+                    </div>
+                </div>
+                <div class="flex items-center gap-2">
+                    <span class="text-xs text-gray-500 hidden sm:block">AI Destekli</span>
+                    <div class="w-2 h-2 rounded-full bg-green-400 animate-pulse"></div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main -->
+        <main class="px-4 pb-12">
+            <div class="max-w-5xl mx-auto">
+                <!-- Progress Steps -->
+                <div class="mb-8">
+                    <div class="flex items-center justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <div class="step-indicator w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold step-active" id="step1Circle">1</div>
+                            <span class="text-xs text-gray-300 hidden sm:block">Kişisel Bilgiler</span>
+                        </div>
+                        <div class="flex-1 mx-2 progress-line h-0.5 rounded"><div class="progress-fill h-full rounded" id="progress1" style="width:0%"></div></div>
+                        <div class="flex items-center gap-2">
+                            <div class="step-indicator w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold step-pending" id="step2Circle">2</div>
+                            <span class="text-xs text-gray-500 hidden sm:block">Doğum Bilgileri</span>
+                        </div>
+                        <div class="flex-1 mx-2 progress-line h-0.5 rounded"><div class="progress-fill h-full rounded" id="progress2" style="width:0%"></div></div>
+                        <div class="flex items-center gap-2">
+                            <div class="step-indicator w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold step-pending" id="step3Circle">3</div>
+                            <span class="text-xs text-gray-500 hidden sm:block">Doğrulama</span>
+                        </div>
+                        <div class="flex-1 mx-2 progress-line h-0.5 rounded"><div class="progress-fill h-full rounded" id="progress3" style="width:0%"></div></div>
+                        <div class="flex items-center gap-2">
+                            <div class="step-indicator w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold step-pending" id="step4Circle">4</div>
+                            <span class="text-xs text-gray-500 hidden sm:block">Sonuçlar</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Wizard -->
+                <div class="glass-card rounded-2xl p-6 sm:p-8 min-h-[500px]">
+                    <!-- Step 1 -->
+                    <div id="step1" class="wizard-step">
+                        <div class="text-center mb-8">
+                            <div class="w-16 h-16 rounded-2xl gold-gradient flex items-center justify-center mx-auto float-anim mb-4">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0a0e27" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                            </div>
+                            <h2 class="text-2xl font-bold gold-text mb-2">Kişisel Bilgileriniz</h2>
+                            <p class="text-gray-400 text-sm">Ruhani yolculuğunuz için temel bilgilerinizi girin</p>
+                        </div>
+                        <div class="space-y-5 max-w-md mx-auto">
+                            <div>
+                                <label class="block text-sm text-gray-300 mb-2"><span class="flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>İsim</span></label>
+                                <input type="text" id="inputName" class="input-field w-full px-4 py-3 rounded-xl text-sm" placeholder="Adınız ve Soyadınız" />
+                                <p class="text-xs text-gray-500 mt-1">İsminiz Ebced hesabı için kullanılacaktır</p>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-300 mb-2"><span class="flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="2"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72"/></svg>Cep Telefonu</span></label>
+                                <div class="phone-input-group">
+                                    <select id="phoneCode" class="select-field px-3 py-3 rounded-xl text-sm w-24"><option value="+90">🇹🇷 +90</option><option value="+1">🇺🇸 +1</option><option value="+44">🇬🇧 +44</option><option value="+49">🇩🇪 +49</option></select>
+                                    <input type="tel" id="inputPhone" class="input-field flex-1 px-4 py-3 rounded-xl text-sm" placeholder="5XX XXX XX XX" maxlength="14" />
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-300 mb-2"><span class="flex items-center gap-2"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#d4af37" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>E-posta (İsteğe Bağlı)</span></label>
+                                <input type="email" id="inputEmail" class="input-field w-full px-4 py-3 rounded-xl text-sm" placeholder="ornek@email.com" />
+                            </div>
+                            <div class="ornament-line my-6"></div>
+                            <div class="flex items-start gap-3">
+                                <input type="checkbox" id="agreeTerms" class="mt-1 accent-amber-500" />
+                                <label for="agreeTerms" class="text-xs text-gray-400 leading-relaxed">Kişisel verilerimin 6698 sayılı KVKK kapsamında işlenmesini kabul ediyorum.</label>
+                            </div>
+                            <button id="btnStep1Next" class="btn-primary w-full py-3 rounded-xl text-sm mt-4" disabled>Devam Et →</button>
+                        </div>
+                    </div>
+
+                    <!-- Step 2 -->
+                    <div id="step2" class="wizard-step hidden">
+                        <div class="text-center mb-8">
+                            <div class="w-16 h-16 rounded-2xl gold-gradient flex items-center justify-center mx-auto float-anim mb-4">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0a0e27" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                            </div>
+                            <h2 class="text-2xl font-bold gold-text mb-2">Doğum Bilgileriniz</h2>
+                            <p class="text-gray-400 text-sm">Astrolojik haritanız ve ruhani analiz için gerekli bilgiler</p>
+                        </div>
+                        <div class="space-y-5 max-w-md mx-auto">
+                            <div>
+                                <label class="block text-sm text-gray-300 mb-2">Doğum Tarihi</label>
+                                <div class="grid grid-cols-3 gap-3">
+                                    <div><label class="text-xs text-gray-500 mb-1 block">Gün</label><select id="birthDay" class="select-field w-full px-3 py-3 rounded-xl text-sm"><option value="">Gün</option></select></div>
+                                    <div><label class="text-xs text-gray-500 mb-1 block">Ay</label><select id="birthMonth" class="select-field w-full px-3 py-3 rounded-xl text-sm"><option value="">Ay</option><option value="1">Ocak</option><option value="2">Şubat</option><option value="3">Mart</option><option value="4">Nisan</option><option value="5">Mayıs</option><option value="6">Haziran</option><option value="7">Temmuz</option><option value="8">Ağustos</option><option value="9">Eylül</option><option value="10">Ekim</option><option value="11">Kasım</option><option value="12">Aralık</option></select></div>
+                                    <div><label class="text-xs text-gray-500 mb-1 block">Yıl</label><select id="birthYear" class="select-field w-full px-3 py-3 rounded-xl text-sm"><option value="">Yıl</option></select></div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-300 mb-2">Doğum Saati</label>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div><label class="text-xs text-gray-500 mb-1 block">Saat</label><select id="birthHour" class="select-field w-full px-3 py-3 rounded-xl text-sm"><option value="">Saat</option></select></div>
+                                    <div><label class="text-xs text-gray-500 mb-1 block">Dakika</label><select id="birthMinute" class="select-field w-full px-3 py-3 rounded-xl text-sm"><option value="">Dakika</option></select></div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <input type="checkbox" id="unknownTime" class="accent-amber-500" />
+                                <label for="unknownTime" class="text-xs text-gray-400">Doğum saatimi bilmiyorum</label>
+                            </div>
+                            <div>
+                                <label class="block text-sm text-gray-300 mb-2">Doğum Yeri</label>
+                                <input type="text" id="birthCity" class="input-field w-full px-4 py-3 rounded-xl text-sm" placeholder="Şehir, Ülke" />
+                                <div id="citySuggestions" class="hidden mt-2 glass-card-light rounded-xl overflow-hidden max-h-40 overflow-y-auto scrollbar-hide"></div>
+                            </div>
+                            <div class="ornament-line my-6"></div>
+                            <div class="flex items-start gap-3">
+                                <input type="checkbox" id="wantAstrology" class="mt-1 accent-amber-500" checked />
+                                <label for="wantAstrology" class="text-xs text-gray-400 leading-relaxed">Astrolojik doğum haritası analizi istiyorum</label>
+                            </div>
+                            <div class="flex gap-3">
+                                <button id="btnStep2Back" class="btn-secondary flex-1 py-3 rounded-xl text-sm">← Geri</button>
+                                <button id="btnStep2Next" class="btn-primary flex-1 py-3 rounded-xl text-sm" disabled>Devam Et →</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Step 3 -->
+                    <div id="step3" class="wizard-step hidden">
+                        <div class="text-center mb-8">
+                            <div class="w-16 h-16 rounded-2xl gold-gradient flex items-center justify-center mx-auto float-anim mb-4">
+                                <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="#0a0e27" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                            </div>
+                            <h2 class="text-2xl font-bold gold-text mb-2">Telefon Doğrulama</h2>
+                            <p class="text-gray-400 text-sm">Telefonunuza gönderilen 6 haneli kodu girin</p>
+                        </div>
+                        <div class="max-w-sm mx-auto">
+                            <div class="text-center mb-6"><div class="info-badge inline-block px-4 py-2 rounded-full text-sm" id="maskedPhone">+90 5XX XXX XX 34</div></div>
+                            <div class="flex justify-center gap-3 mb-6">
+                                <input type="text" maxlength="1" class="input-field w-12 h-14 text-center text-xl font-bold rounded-xl otp-input" data-index="0" />
+                                <input type="text" maxlength="1" class="input-field w-12 h-14 text-center text-xl font-bold rounded-xl otp-input" data-index="1" />
+                                <input type="text" maxlength="1" class="input-field w-12 h-14 text-center text-xl font-bold rounded-xl otp-input" data-index="2" />
+                                <input type="text" maxlength="1" class="input-field w-12 h-14 text-center text-xl font-bold rounded-xl otp-input" data-index="3" />
+                                <input type="text" maxlength="1" class="input-field w-12 h-14 text-center text-xl font-bold rounded-xl otp-input" data-index="4" />
+                                <input type="text" maxlength="1" class="input-field w-12 h-14 text-center text-xl font-bold rounded-xl otp-input" data-index="5" />
+                            </div>
+                            <div class="text-center mb-6">
+                                <p class="text-xs text-gray-500" id="resendTimer">Kodu tekrar gönder: <span id="countdown">60</span>s</p>
+                                <button id="resendBtn" class="text-xs text-amber-400 mt-1 hidden hover:underline" onclick="resendCode()">Kodu Tekrar Gönder</button>
+                            </div>
+                            <div id="verifyError" class="hidden text-center text-red-400 text-sm mb-4">Geçersiz kod.</div>
+                            <div class="flex gap-3">
+                                <button id="btnStep3Back" class="btn-secondary flex-1 py-3 rounded-xl text-sm">← Geri</button>
+                                <button id="btnStep3Next" class="btn-primary flex-1 py-3 rounded-xl text-sm" disabled>Doğrula ✓</button>
+                            </div>
+                            <div class="ornament-line my-6"></div>
+                            <div class="text-center"><p class="text-xs text-gray-500">Demo kodu: <span class="text-amber-400 font-mono">123456</span></p></div>
+                        </div>
+                    </div>
+
+                    <!-- Step 4: Results -->
+                    <div id="step4" class="wizard-step hidden">
+                        <div id="loadingState" class="text-center py-12">
+                            <div class="loading-spinner mx-auto mb-4"></div>
+                            <h3 class="text-lg font-bold gold-text mb-2">Analiz Hazırlanıyor...</h3>
+                            <p class="text-gray-400 text-sm" id="loadingText">Ebced değeri hesaplanıyor</p>
+                        </div>
+
+                        <div id="resultsContent" class="hidden">
+                            <!-- Header -->
+                            <div class="text-center mb-8">
+                                <div class="w-20 h-20 rounded-full gold-gradient flex items-center justify-center mx-auto pulse-glow mb-4">
+                                    <span class="text-3xl font-amiri text-gray-900 font-bold" id="resultEbcedNum">—</span>
+                                </div>
+                                <h2 class="text-2xl font-bold gold-text mb-1">Ruhani Analiz Sonuçlarınız</h2>
+                                <p class="text-gray-400 text-sm" id="resultName">—</p>
+                            </div>
+
+                            <!-- Tabs -->
+                            <div class="flex border-b border-gray-700/50 mb-6 overflow-x-auto scrollbar-hide">
+                                <button class="tab-btn active px-4 py-3 text-sm text-gray-300 whitespace-nowrap" data-tab="esma" onclick="switchTab('esma')">✨ Esma-ül Hüsna</button>
+                                <button class="tab-btn px-4 py-3 text-sm text-gray-300 whitespace-nowrap" data-tab="zikir" onclick="switchTab('zikir')">📿 Zikir & Fazilet</button>
+                                <button class="tab-btn px-4 py-3 text-sm text-gray-300 whitespace-nowrap" data-tab="zaman" onclick="switchTab('zaman')">🕐 Hayırlı Zamanlar</button>
+                                <button class="tab-btn px-4 py-3 text-sm text-gray-300 whitespace-nowrap" data-tab="astroloji" onclick="switchTab('astroloji')" id="astrologyTab">🌟 Astroloji</button>
+                                <button class="tab-btn px-4 py-3 text-sm text-gray-300 whitespace-nowrap" data-tab="palmistry" onclick="switchTab('palmistry')">🤲 El Falı</button>
+                            </div>
+
+                            <!-- Tab: Esma -->
+                            <div id="tab-esma" class="tab-content">
+                                <div class="esma-card rounded-2xl p-6 mb-6">
+                                    <div class="text-center mb-4">
+                                        <p class="text-xs text-gray-400 mb-2">Sizin Esma-ül Hüsna'nız</p>
+                                        <h3 class="text-4xl font-amiri gold-text mb-2" id="esmaArabic">—</h3>
+                                        <h4 class="text-xl font-bold text-white" id="esmaName">—</h4>
+                                        <p class="text-sm text-gray-400 mt-1" id="esmaMeaning">—</p>
+                                    </div>
+                                    <div class="ornament-line my-4"></div>
+                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 text-center">
+                                        <div class="glass-card-light rounded-xl p-3"><p class="text-xs text-gray-400">Ebced</p><p class="text-lg font-bold gold-text" id="ebcedValue">—</p></div>
+                                        <div class="glass-card-light rounded-xl p-3"><p class="text-xs text-gray-400">Sırası</p><p class="text-lg font-bold gold-text" id="esmaOrder">—</p></div>
+                                        <div class="glass-card-light rounded-xl p-3"><p class="text-xs text-gray-400">Zikir</p><p class="text-lg font-bold gold-text" id="zikirCount">—</p></div>
+                                        <div class="glass-card-light rounded-xl p-3"><p class="text-xs text-gray-400">Element</p><p class="text-lg font-bold gold-text" id="esmaElement">—</p></div>
+                                    </div>
+                                </div>
+                                <div class="result-section mb-6"><h4 class="text-sm font-bold text-amber-400 mb-2">📖 Detaylı Açıklama</h4><p class="text-sm text-gray-300 leading-relaxed" id="esmaDetail">—</p></div>
+                                <div class="result-section mb-6"><h4 class="text-sm font-bold text-amber-400 mb-2">🌟 Ruhsal Özellikler</h4><div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="spiritualTraits"></div></div>
+                                <div class="result-section"><h4 class="text-sm font-bold text-amber-400 mb-2">💫 Kazandıracağı Güçler</h4><ul class="space-y-2" id="spiritualPowers"></ul></div>
+                            </div>
+
+                            <!-- Tab: Zikir -->
+                            <div id="tab-zikir" class="tab-content hidden">
+                                <div class="esma-card rounded-2xl p-6 mb-6"><h4 class="text-sm font-bold text-amber-400 mb-4">📿 Günlük Zikir Programı</h4><div class="space-y-4" id="zikirProgram"></div></div>
+                                <div class="esma-card rounded-2xl p-6 mb-6"><h4 class="text-sm font-bold text-amber-400 mb-4">🎯 Zikirlerin Anlamları</h4><div class="space-y-3" id="zikirMeanings"></div></div>
+                                <div class="esma-card rounded-2xl p-6"><h4 class="text-sm font-bold text-amber-400 mb-4">🏆 Faziletler</h4><div class="space-y-3" id="faziletler"></div></div>
+                            </div>
+
+                            <!-- Tab: Zaman -->
+                            <div id="tab-zaman" class="tab-content hidden">
+                                <div class="esma-card rounded-2xl p-6 mb-6"><h4 class="text-sm font-bold text-amber-400 mb-4">📅 Hayırlı Günler</h4><div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="luckyDays"></div></div>
+                                <div class="esma-card rounded-2xl p-6 mb-6"><h4 class="text-sm font-bold text-amber-400 mb-4">🕐 Hayırlı Saatler</h4><div class="space-y-3" id="luckyHours"></div></div>
+                                <div class="esma-card rounded-2xl p-6 mb-6"><h4 class="text-sm font-bold text-amber-400 mb-4">🌙 Ay Fazları</h4><div class="space-y-3" id="moonPhases"></div></div>
+                                <div class="esma-card rounded-2xl p-6">
+                                    <h4 class="text-sm font-bold text-amber-400 mb-4">📊 Haftalık Takvim</h4>
+                                    <div class="overflow-x-auto"><table class="w-full text-sm"><thead><tr class="border-b border-gray-700/50"><th class="py-2 text-left text-gray-400">Gün</th><th class="py-2 text-left text-gray-400">Saat</th><th class="py-2 text-left text-gray-400">Zikir</th><th class="py-2 text-left text-gray-400">Adet</th></tr></thead><tbody id="calendarBody"></tbody></table></div>
+                                </div>
+                            </div>
+
+                            <!-- Tab: Astroloji -->
+                            <div id="tab-astroloji" class="tab-content hidden">
+                                <div class="esma-card rounded-2xl p-6 mb-6">
+                                    <h4 class="text-sm font-bold text-amber-400 mb-4">🌟 Doğum Haritası</h4>
+                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4">
+                                        <div class="glass-card-light rounded-xl p-3 text-center"><p class="text-xs text-gray-400">Güneş</p><p class="text-2xl mt-1" id="sunSignDisplay">—</p><p class="text-xs text-amber-400" id="sunSignName">—</p></div>
+                                        <div class="glass-card-light rounded-xl p-3 text-center"><p class="text-xs text-gray-400">Yükselen</p><p class="text-2xl mt-1" id="risingSignDisplay">—</p><p class="text-xs text-amber-400" id="risingSignName">—</p></div>
+                                        <div class="glass-card-light rounded-xl p-3 text-center"><p class="text-xs text-gray-400">Ay</p><p class="text-2xl mt-1" id="moonSignDisplay">—</p><p class="text-xs text-amber-400" id="moonSignName">—</p></div>
+                                        <div class="glass-card-light rounded-xl p-3 text-center"><p class="text-xs text-gray-400">Element</p><p class="text-2xl mt-1" id="elementDisplay">—</p><p class="text-xs text-amber-400" id="elementName">—</p></div>
+                                    </div>
+                                    <div id="astrologyAIContainer"></div>
+                                </div>
+                                <div class="esma-card rounded-2xl p-6 mb-6">
+                                    <h4 class="text-sm font-bold text-amber-400 mb-4">🪐 Gezegen Konumları</h4>
+                                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3" id="planetPositions"></div>
+                                </div>
+                                <div class="esma-card rounded-2xl p-6">
+                                    <h4 class="text-sm font-bold text-amber-400 mb-4">🤖 AI Detaylı Analiz</h4>
+                                    <div class="flex flex-wrap gap-2 mb-4">
+                                        <button class="btn-secondary px-4 py-2 rounded-lg text-xs" onclick="requestAstrologyAnalysis('natal_chart')">📊 Natal Harita</button>
+                                        <button class="btn-secondary px-4 py-2 rounded-lg text-xs" onclick="requestAstrologyAnalysis('planet_analysis')">🪐 Gezegenler</button>
+                                        <button class="btn-secondary px-4 py-2 rounded-lg text-xs" onclick="requestAstrologyAnalysis('transit_analysis')">🌍 Transitler</button>
+                                        <button class="btn-secondary px-4 py-2 rounded-lg text-xs" onclick="requestAstrologyAnalysis('esma_astrology_link')">✨ Esma Bağlantısı</button>
+                                    </div>
+                                    <div id="astrologyThinking" class="hidden ai-thinking mb-4"><div class="ai-thinking-dot"></div><div class="ai-thinking-dot"></div><div class="ai-thinking-dot"></div><span>AI analiz ediyor...</span></div>
+                                    <div id="astrologyResponseContainer"></div>
+                                </div>
+                            </div>
+
+                            <!-- Tab: Palmistry (EL FALI) -->
+                            <div id="tab-palmistry" class="tab-content hidden">
+                                <div class="esma-card rounded-2xl p-6 mb-6">
+                                    <div class="flex items-center gap-3 mb-4">
+                                        <span class="text-2xl">🤲</span>
+                                        <div>
+                                            <h4 class="text-sm font-bold text-amber-400">El Falı Analizi (Palmistry)</h4>
+                                            <p class="text-xs text-gray-400 mt-1">Avuç içinizin fotoğrafını yükleyin, AI model avuç çizgilerinizi analiz etsin</p>
+                                        </div>
+                                    </div>
+
+                                    <!-- Upload Zone -->
+                                    <div class="upload-zone mb-4" id="uploadZone" onclick="document.getElementById('palmImageInput').click()">
+                                        <input type="file" id="palmImageInput" accept="image/*" class="hidden" onchange="handlePalmImage(event)" />
+                                        <div id="uploadPlaceholder">
+                                            <div class="text-4xl mb-3">📸</div>
+                                            <p class="text-sm text-gray-300 mb-1">El fotoğrafınızı yükleyin</p>
+                                            <p class="text-xs text-gray-500">Sürükle-bırak veya tıklayarak seçin</p>
+                                            <p class="text-xs text-gray-600 mt-2">PNG, JPG • Maks 10MB • Avuç içi net görünmeli</p>
+                                        </div>
+                                        <div id="uploadPreview" class="hidden">
+                                            <img id="palmPreviewImg" class="upload-preview mx-auto" alt="El fotoğrafı" />
+                                        </div>
+                                    </div>
+
+                                    <!-- Hand selection -->
+                                    <div class="flex gap-3 mb-4" id="handSelection" style="display:none;">
+                                        <label class="flex-1 glass-card-light rounded-xl p-3 cursor-pointer text-center hover:border-amber-500/30 transition-all">
+                                            <input type="radio" name="handSide" value="left" class="hidden" />
+                                            <span class="text-lg">🤚</span>
+                                            <p class="text-xs text-gray-300 mt-1">Sol El</p>
+                                        </label>
+                                        <label class="flex-1 glass-card-light rounded-xl p-3 cursor-pointer text-center hover:border-amber-500/30 transition-all border border-amber-500/30">
+                                            <input type="radio" name="handSide" value="right" class="hidden" checked />
+                                            <span class="text-lg">✋</span>
+                                            <p class="text-xs text-gray-300 mt-1">Sağ El</p>
+                                        </label>
+                                    </div>
+
+                                    <!-- Gender -->
+                                    <div class="flex gap-3 mb-4" id="genderSelection" style="display:none;">
+                                        <label class="flex-1 glass-card-light rounded-xl p-3 cursor-pointer text-center hover:border-amber-500/30 transition-all">
+                                            <input type="radio" name="palmGender" value="male" class="hidden" />
+                                            <p class="text-xs text-gray-300">Erkek</p>
+                                        </label>
+                                        <label class="flex-1 glass-card-light rounded-xl p-3 cursor-pointer text-center hover:border-amber-500/30 transition-all border border-amber-500/30">
+                                            <input type="radio" name="palmGender" value="female" class="hidden" checked />
+                                            <p class="text-xs text-gray-300">Kadın</p>
+                                        </label>
+                                    </div>
+
+                                    <!-- Analyze Button -->
+                                    <button id="analyzePalmBtn" class="btn-primary w-full py-3 rounded-xl text-sm" style="display:none;" onclick="analyzePalm()">
+                                        🔍 El Falı Analizini Başlat
+                                    </button>
+
+                                    <!-- Analysis Progress -->
+                                    <div id="palmAnalysisProgress" class="hidden mt-6">
+                                        <div class="flex items-center gap-3 mb-4">
+                                            <div class="loading-spinner" style="width:24px;height:24px;border-width:2px;"></div>
+                                            <span class="text-sm text-gray-300" id="palmAnalysisStatus">Fotoğraf analiz ediliyor...</span>
+                                        </div>
+                                        <div class="space-y-1">
+                                            <div class="analysis-step" id="palmStep1"><div class="analysis-step-dot"></div><span class="text-xs text-gray-400">Görüntü işleme ve çizgi tespiti</span></div>
+                                            <div class="analysis-step" id="palmStep2"><div class="analysis-step-dot"></div><span class="text-xs text-gray-400">Ana çizgilerin sınıflandırılması</span></div>
+                                            <div class="analysis-step" id="palmStep3"><div class="analysis-step-dot"></div><span class="text-xs text-gray-400">Mount (tepe) bölgelerinin analizi</span></div>
+                                            <div class="analysis-step" id="palmStep4"><div class="analysis-step-dot"></div><span class="text-xs text-gray-400">RAG dokümantasyonundan eşleştirme</span></div>
+                                            <div class="analysis-step" id="palmStep5"><div class="analysis-step-dot"></div><span class="text-xs text-gray-400">Kapsamlı yorum oluşturma</span></div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Results -->
+                                    <div id="palmResults" class="hidden mt-6"></div>
+
+                                    <!-- Structured Output -->
+                                    <div id="palmStructuredOutput" class="hidden mt-4">
+                                        <button class="text-xs text-gray-500 hover:text-gray-300 mb-2" onclick="togglePalmJSON()">📋 Yapılandırılmış Veri (JSON)</button>
+                                        <div id="palmJSONContainer" class="hidden structured-json mt-2"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Palmistry Info -->
+                                <div class="esma-card rounded-2xl p-6">
+                                    <h4 class="text-sm font-bold text-amber-400 mb-4">📖 Palmistry Hakkında</h4>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                        <div class="glass-card-light rounded-xl p-4">
+                                            <p class="text-xs font-bold text-white mb-2">🔴 Kalp Çizgisi (Heart Line)</p>
+                                            <p class="text-xs text-gray-400">Duygusal yaşam, aşk ve ilişkiler hakkında bilgi verir. Avuç içinin üst kısmında yer alır.</p>
+                                        </div>
+                                        <div class="glass-card-light rounded-xl p-4">
+                                            <p class="text-xs font-bold text-white mb-2">🧠 Baş Çizgisi (Head Line)</p>
+                                            <p class="text-xs text-gray-400">Zihinsel kapasite, düşünce tarzı ve konsantrasyon. Avuç ortasından yatay uzanır.</p>
+                                        </div>
+                                        <div class="glass-card-light rounded-xl p-4">
+                                            <p class="text-xs font-bold text-white mb-2">🌿 Hayat Çizgisi (Life Line)</p>
+                                            <p class="text-xs text-gray-400">Yaşam enerjisi, vitalite ve büyük yaşam değişiklikleri. Başparmak etrafında kavis çizer.</p>
+                                        </div>
+                                        <div class="glass-card-light rounded-xl p-4">
+                                            <p class="text-xs font-bold text-white mb-2">⭐ Kader Çizgisi (Fate Line)</p>
+                                            <p class="text-xs text-gray-400">Kariyer, hayat yolu ve dış etkiler. Avuç ortasından dikey uzanır.</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Bottom Actions -->
+                            <div class="ornament-line my-8"></div>
+                            <div class="flex flex-col sm:flex-row gap-3">
+                                <button class="btn-secondary flex-1 py-3 rounded-xl text-sm" onclick="exportJSON()">📄 JSON Dışa Aktar</button>
+                                <button class="btn-primary flex-1 py-3 rounded-xl text-sm" onclick="resetWizard()">🔄 Yeni Analiz</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- JSON Modal -->
+    <div id="jsonModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="glass-card rounded-2xl p-6 max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-bold gold-text">API Payload</h3>
+                <button onclick="closeJSONModal()" class="text-gray-400 hover:text-white">✕</button>
+            </div>
+            <pre class="bg-black/40 rounded-xl p-4 text-xs text-green-400 font-mono overflow-x-auto" id="jsonOutput"></pre>
+            <button class="btn-primary w-full py-3 rounded-xl text-sm mt-4" onclick="copyJSON()">📋 Panoya Kopyala</button>
+        </div>
+    </div>
+
+    <script>
+    // ===================================================================
+    // MCP PROVIDER - Gerçek Entegrasyon (Production Ready)
+    // ===================================================================
+    class MCPProvider {
+        constructor(config) {
+            if (!config.endpoint) throw new Error('MCP endpoint gerekli');
+            this.endpoint = config.endpoint;
+            this.apiKey = config.apiKey || null;
+            this.timeout = config.timeout || 60000;
+            this.maxRetries = config.maxRetries || 3;
+            this.retryDelay = config.retryDelay || 1000;
+            this.sessionId = null;
+            this.connected = false;
+            this.requestId = 0;
+            this.onError = config.onError || (() => {});
+            this.onLog = config.onLog || (() => {});
+        }
+
+        _nextId() { return `mcp_${Date.now()}_${++this.requestId}`; }
+
+        _headers() {
+            const h = {
+                'Content-Type': 'application/json',
+                'X-MCP-Protocol-Version': '2024-11-05',
+                'X-Client-Name': 'ruhani-kesif-dashboard',
+                'X-Client-Version': '2.0.0'
+            };
+            if (this.apiKey) h['Authorization'] = `Bearer ${this.apiKey}`;
+            if (this.sessionId) h['X-Session-Id'] = this.sessionId;
+            return h;
+        }
+
+        async _fetchWithRetry(method, params, attempt = 1) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), this.timeout);
+
+            const body = JSON.stringify({
+                jsonrpc: '2.0',
+                id: this._nextId(),
+                method,
+                params: { ...params, _session: this.sessionId }
+            });
+
+            try {
+                this.onLog('info', `[Attempt ${attempt}/${this.maxRetries}] ${method} → ${this.endpoint}`);
+                
+                const response = await fetch(this.endpoint, {
+                    method: 'POST',
+                    headers: this._headers(),
+                    body,
+                    signal: controller.signal,
+                    keepalive: true
+                });
+
+                clearTimeout(timeoutId);
+
+                if (!response.ok) {
+                    const errText = await response.text().catch(() => 'Unknown error');
+                    throw new Error(`HTTP ${response.status}: ${errText}`);
+                }
+
+                const data = await response.json();
+                
+                if (data.error) {
+                    throw new Error(`MCP Error [${data.error.code}]: ${data.error.message}`);
+                }
+
+                // Extract session from response if provided
+                if (response.headers.get('X-Session-Id')) {
+                    this.sessionId = response.headers.get('X-Session-Id');
+                }
+
+                this.onLog('success', `${method} başarılı`);
+                return data.result;
+
+            } catch (err) {
+                clearTimeout(timeoutId);
+
+                if (err.name === 'AbortError') {
+                    throw new Error(`Timeout: ${this.timeout}ms aşıldı`);
+                }
+
+                if (attempt < this.maxRetries && (err.message.includes('fetch') || err.message.includes('network') || err.message.includes('5'))) {
+                    this.onLog('warn', `Başarısız, ${this.retryDelay}ms sonra tekrar denenecek...`);
+                    await new Promise(r => setTimeout(r, this.retryDelay * attempt));
+                    return this._fetchWithRetry(method, params, attempt + 1);
+                }
+
+                this.onError(err);
+                throw err;
+            }
+        }
+
+        // MCP Protocol Methods
+        async initialize(clientInfo) {
+            const result = await this._fetchWithRetry('initialize', {
+                protocolVersion: '2024-11-05',
+                capabilities: {
+                    tools: {},
+                    resources: {},
+                    prompts: {}
+                },
+                clientInfo: clientInfo || {
+                    name: 'ruhani-kesif',
+                    version: '2.0.0'
+                }
+            });
+            this.sessionId = result?.sessionId || this._nextId();
+            this.connected = true;
+            this.onLog('success', `MCP initialize tamamlandı. Session: ${this.sessionId}`);
+            return result;
+        }
+
+        async callTool(toolName, args) {
+            if (!this.connected) {
+                await this.initialize();
+            }
+            return this._fetchWithRetry('tools/call', {
+                name: toolName,
+                arguments: args
+            });
+        }
+
+        async getPrompt(promptName, promptArgs) {
+            if (!this.connected) await this.initialize();
+            return this._fetchWithRetry('prompts/get', {
+                name: promptName,
+                arguments: promptArgs
+            });
+        }
+
+        async listTools() {
+            if (!this.connected) await this.initialize();
+            return this._fetchWithRetry('tools/list', {});
+        }
+
+        async readResource(uri) {
+            if (!this.connected) await this.initialize();
+            return this._fetchWithRetry('resources/read', { uri });
+        }
+
+        async disconnect() {
+            this.connected = false;
+            this.sessionId = null;
+            this.onLog('info', 'MCP bağlantısı kapatıldı');
+        }
+    }
+
+    // ===================================================================
+    // APPLICATION SERVICE - Business Logic
+    // ===================================================================
+    class ApplicationService {
+        constructor(mcpProvider) {
+            this.mcp = mcpProvider;
+        }
+
+        async analyzeAstrology(birthData, analysisType) {
+            return this.mcp.callTool('astrology_analyze', {
+                birth_data: birthData,
+                analysis_type: analysisType,
+                output_format: 'structured_json'
+            });
+        }
+
+        async analyzePalmistry(imageBase64, metadata) {
+            return this.mcp.callTool('palmistry_analyze', {
+                image: imageBase64,
+                hand_side: metadata.handSide,
+                gender: metadata.gender,
+                subject_name: metadata.name,
+                birth_data: metadata.birthData,
+                rag_context: 'palmistry_knowledge_base',
+                output_format: 'structured_json'
+            });
+        }
+
+        async calculateEbced(name) {
+            return this.mcp.callTool('ebced_calculate', { name });
+        }
+    }
+
+    // ===================================================================
+    // MCP CLIENT INITIALIZATION
+    // ===================================================================
+    const MCP_CONFIG = {
+        endpoint: window.__MCP_ENDPOINT__ || 'http://localhost:3001/mcp',
+        apiKey: window.__MCP_API_KEY__ || null,
+        timeout: 120000,
+        maxRetries: 3,
+        retryDelay: 2000,
+        onError: (err) => console.error('[MCP Error]', err),
+        onLog: (level, msg) => console.log(`[MCP ${level.toUpperCase()}]`, msg)
+    };
+
+    let mcpProvider;
+    let appService;
+
+    try {
+        mcpProvider = new MCPProvider(MCP_CONFIG);
+        appService = new ApplicationService(mcpProvider);
+    } catch (e) {
+        console.error('MCP Provider init failed:', e);
+    }
+
+    // ===================================================================
+    // GLOBAL STATE
+    // ===================================================================
+    let currentStep = 1;
+    let userData = {};
+    let countdownInterval;
+    let palmImageBase64 = null;
+    let lastPalmResult = null;
+    let lastAstroResult = null;
+
+    // ===================================================================
+    // EBCEM & ESMA DATABASE
+    // ===================================================================
+    const turkishToArabic = {'a':'ا','b':'ب','c':'ج','ç':'چ','d':'د','e':'ه','f':'ف','g':'گ','ğ':'غ','h':'ح','ı':'ى','i':'ي','j':'ژ','k':'ك','l':'ل','m':'م','n':'ن','o':'و','ö':'و','p':'پ','r':'ر','s':'س','ş':'ش','t':'ت','u':'و','ü':'و','v':'و','y':'ي','z':'ز','A':'ا','B':'ب','C':'ج','Ç':'چ','D':'د','E':'ه','F':'ف','G':'گ','Ğ':'غ','H':'ح','I':'ى','İ':'ي','J':'ژ','K':'ك','L':'ل','M':'م','N':'ن','O':'و','Ö':'و','P':'پ','R':'ر','S':'س','Ş':'ش','T':'ت','U':'و','Ü':'و','V':'و','Y':'ي','Z':'ز'};
+    const arabicLetterValues = {'ا':1,'ب':2,'ج':3,'چ':4,'د':4,'ه':5,'و':6,'ز':7,'ح':8,'ط':9,'ي':10,'ك':20,'ل':30,'م':40,'ن':50,'س':60,'ع':70,'ف':80,'ص':90,'ق':100,'ر':200,'ش':300,'ت':400,'ث':500,'خ':600,'ذ':700,'ض':800,'ظ':900,'غ':1000,'گ':20,'پ':2,'ژ':7,'ى':10};
+
+    const esmaulHusna = [
+        {order:1,arabic:"ٱلرَّحْمَٰنُ",name:"Er-Rahmân",meaning:"Sonsuz merhamet sahibi",ebced:291,element:"Su",zikirCount:100,days:["Pazartesi","Perşembe"],hours:["06:00-08:00","14:00-16:00"],moonPhase:"Hilal",detail:"Er-Rahmân, Allah'ın sonsuz merhametini ifade eder. Bu ismi zikreden kişi kalbinde derin bir şefkat ve merhamet hissi taşır.",traits:["Derin merhamet sahibi","Şefkatli ve koruyucu","Bağışlayıcı yapı","İnsanlara karşı yumuşak huylu"],powers:["Kalp yumuşaklığı ve merhamet","Duaların kabulü","İnsanlar arasında sevgi ve saygı","Ruhsal huzur ve dinginlik"],faziletler:["Her gün 100 defa zikredene rızık kapıları açılır","Zor durumda kalanlara yardım eli uzanır","Kalbi katılaşanların kalbi yumuşar","Dua ve niyazların kabulüne vesile olur"],zikirler:[{text:"Yâ Rahmân",meaning:"Ey sonsuz merhamet sahibi",count:100,time:"Sabah namazı sonrası"},{text:"Bismillâhirrahmânirrahîm",meaning:"Rahmân ve Rahîm olan Allah'ın adıyla",count:19,time:"Her işe başlamadan önce"}]},
+        {order:2,arabic:"ٱلرَّحِيمُ",name:"Er-Rahîm",meaning:"Ahirette müminlere özel merhamet eden",ebced:258,element:"Su",zikirCount:100,days:["Pazartesi","Cuma"],hours:["05:00-07:00","15:00-17:00"],moonPhase:"Dolunay",detail:"Er-Rahîm, ahirette müminlere özel merhamet eden demektir.",traits:["Manevi derinlik","Sürekli bağışlayıcı","Sabırlı ve anlayışlı","İçsel huzur"],powers:["Ruhsal şifa gücü","Affetme kapasitesi","Manevi korunma","İçsel denge"],faziletler:["Her gün 100 defa zikredene manevi huzur nasip olur","Günahların affına vesile olur","Kalbe nur ve ferahlık verir"],zikirler:[{text:"Yâ Rahîm",meaning:"Ey sürekli merhamet eden",count:100,time:"Yatsı namazı sonrası"},{text:"Allâhümme innî es'elüke",meaning:"Allah'ım en büyük ismin hakkıyla senden dilerim",count:7,time:"Sehde iken"}]},
+        {order:3,arabic:"ٱلْمَلِكُ",name:"El-Melik",meaning:"Mülkün gerçek sahibi",ebced:90,element:"Ateş",zikirCount:93,days:["Pazar","Salı"],hours:["07:00-09:00","13:00-15:00"],moonPhase:"Dolunay",detail:"El-Melik, tüm mülkün gerçek sahibi olan demektir.",traits:["Liderlik vasfı","Güçlü irade","Otoriter duruş","Kendi kendine yeten"],powers:["Liderlik ve yönetim gücü","İrade kuvveti","Kararlılık","Nüfuz"],faziletler:["Her gün 93 defa zikredene liderlik vasfı kazandırır","İrade zayıflığına şifa olur","Düşmanlara karşı galibiyet"],zikirler:[{text:"Yâ Melik",meaning:"Ey mutlak hükümdar",count:93,time:"Sabah namazı sonrası"},{text:"Sübhanel melikil-kuddûs",meaning:"Mülk sahibi Allah'ı tesbih ederim",count:33,time:"Akşam namazı sonrası"}]},
+        {order:4,arabic:"ٱلْقُدُّوسُ",name:"El-Kuddûs",meaning:"Her türlü noksanlıktan münezzeh",ebced:194,element:"Ateş",zikirCount:194,days:["Cuma","Cumartesi"],hours:["04:00-06:00","20:00-22:00"],moonPhase:"Hilal",detail:"El-Kuddûs, her türlü eksiklikten uzak, tertemiz demektir.",traits:["Temiz ve pak ruh","Manevi arınmışlık","Saf niyet","İçsel berraklık"],powers:["Ruhsal arınma","Nefis terbiyesi","Manevi temizlik","Günahlardan arınma"],faziletler:["Her gün 194 defa zikredene manevi temizlik nasip olur","Nefis arınmasına vesile olur"],zikirler:[{text:"Yâ Kuddûs",meaning:"Ey her noksanlıktan münezzeh",count:194,time:"Tahajjud namazı sonrası"},{text:"Sübhanallâhil-kuddûs",meaning:"Kuddüs olan Allah'ı tesbih ederim",count:33,time:"Her namaz sonrası"}]},
+        {order:5,arabic:"ٱلسَّلَامُ",name:"Es-Selâm",meaning:"Esenlik veren",ebced:131,element:"Su",zikirCount:131,days:["Pazartesi","Perşembe"],hours:["06:00-08:00","18:00-20:00"],moonPhase:"İlk Dördün",detail:"Es-Selâm, selamet ve esenlik veren demektir.",traits:["Huzur dolu ruh","Güven veren yapı","Barışçıl karakter","İçsel dinginlik"],powers:["Huzur ve güven","Korkulardan kurtulma","Barış ve uyum","Stres ve anksiyeteden arınma"],faziletler:["Her gün 131 defa zikredene huzur nasip olur","Korku ve endişeden kurtulma"],zikirler:[{text:"Yâ Selâm",meaning:"Ey selamet veren",count:131,time:"Sabah ve akşam"},{text:"Allâhümme entesselâm",meaning:"Allah'ım selamet sensin",count:10,time:"Her namaz sonrası"}]},
+        {order:6,arabic:"ٱلْمُؤْمِنُ",name:"El-Mü'min",meaning:"İman bahşeden",ebced:147,element:"Toprak",zikirCount:147,days:["Salı","Perşembe"],hours:["05:00-07:00","12:00-14:00"],moonPhase:"Dolunay",detail:"El-Mü'min, kullarına güvenlik ve iman veren demektir.",traits:["Güçlü iman","Güvenilir karakter","İçsel güven","Sadakat"],powers:["İman kuvveti","Güvenilirlik","İç huzur","Korkusuzluk"],faziletler:["Her gün 147 defa zikredene iman kuvveti nasip olur"],zikirler:[{text:"Yâ Mü'min",meaning:"Ey güven veren",count:147,time:"Sabah namazı sonrası"},{text:"Hasbiyellâh",meaning:"Allah bana yeter",count:7,time:"Endişe anlarında"}]},
+        {order:7,arabic:"ٱلْمُهَيْمِنُ",name:"El-Müheymin",meaning:"Her şeyi gözeten",ebced:195,element:"Su",zikirCount:195,days:["Çarşamba","Cuma"],hours:["03:00-05:00","21:00-23:00"],moonPhase:"Son Dördün",detail:"El-Müheymin, her şeye şahit olan demektir.",traits:["Farkındalık","Koruyuculuk","Gözlem gücü","Dikkat"],powers:["Manevi korunma","Farkındalık artışı","İçgüdü güçlenmesi"],faziletler:["Her gün 195 defa zikredene manevi korunma nasip olur"],zikirler:[{text:"Yâ Müheymin",meaning:"Ey her şeyi gözeten",count:195,time:"Gece yarısı"},{text:"Allâhü hâfızî",meaning:"Allah benim koruyucumdur",count:11,time:"Uyumadan önce"}]},
+        {order:8,arabic:"ٱلْعَزِيزُ",name:"El-Azîz",meaning:"Mutlak güç sahibi",ebced:947,element:"Ateş",zikirCount:947,days:["Salı","Pazar"],hours:["07:00-09:00","11:00-13:00"],moonPhase:"Dolunay",detail:"El-Azîz, mutlak güç ve kuvvet sahibi demektir.",traits:["Manevi güç","Yenilmez irade","Üstünlük","Azim"],powers:["Manevi güç ve kudret","Düşmanlara karşı galibiyet","İrade kuvveti"],faziletler:["Her gün 947 defa zikredene manevi güç nasip olur"],zikirler:[{text:"Yâ Azîz",meaning:"Ey mutlak güç sahibi",count:947,time:"Sabah namazı sonrası"},{text:"Allâhül-azîz",meaning:"Aziz olan Allah",count:100,time:"Zorluk anlarında"}]},
+        {order:9,arabic:"ٱلْجَبَّارُ",name:"El-Cebbâr",meaning:"Her şeye gücü yeten",ebced:206,element:"Ateş",zikirCount:206,days:["Salı","Perşembe"],hours:["08:00-10:00","16:00-18:00"],moonPhase:"Dolunay",detail:"El-Cebbâr, iradesini mutlaka yerine getiren demektir.",traits:["Güçlü irade","Onarıcı güç","Kararlılık","Yücelik"],powers:["Kırık kalpleri onarma","Güçsüzlüğe şifa","Cesaret"],faziletler:["Her gün 206 defa zikredene cesaret nasip olur"],zikirler:[{text:"Yâ Cebbâr",meaning:"Ey her şeye gücü yeten",count:206,time:"Sabah namazı sonrası"},{text:"Yâ Cebbârü'l-kulûb",meaning:"Ey kalpleri düzelten",count:77,time:"Kederli anlarda"}]},
+        {order:10,arabic:"ٱلْمُتَكَبِّرُ",name:"El-Mütekebbir",meaning:"Mutlak büyüklük sahibi",ebced:682,element:"Ateş",zikirCount:682,days:["Pazar","Salı"],hours:["09:00-11:00","15:00-17:00"],moonPhase:"Dolunay",detail:"El-Mütekebbir, büyüklükte eşi olmayan demektir.",traits:["Tevazu","Alçakgönüllülük","Büyüklük bilinci"],powers:["Tevazu kazanma","Kibirden şifa","Manevi yükseliş"],faziletler:["Her gün 682 defa zikredene tevazu nasip olur"],zikirler:[{text:"Yâ Mütekebbir",meaning:"Ey mutlak büyüklük sahibi",count:682,time:"Sabah namazı sonrası"},{text:"Sübhâne men hâzel-mülkü leh",meaning:"Mülk kendisi olan Allah",count:33,time:"Her namaz sonrası"}]},
+        {order:11,arabic:"ٱلْخَالِقُ",name:"El-Hâlık",meaning:"Yaratan",ebced:770,element:"Toprak",zikirCount:770,days:["Pazartesi","Perşembe"],hours:["06:00-08:00","10:00-12:00"],moonPhase:"Hilal",detail:"El-Hâlık, her şeyi yoktan var eden demektir.",traits:["Yaratıcılık","Sanatsal yetenek","İnovasyon","Üretkenlik"],powers:["Yaratıcılık artışı","Sanatsal ilham","Yeni fikirler"],faziletler:["Her gün 770 defa zikredene yaratıcılık nasip olur"],zikirler:[{text:"Yâ Hâlık",meaning:"Ey yaratan",count:770,time:"Sabah namazı sonrası"},{text:"Tebarakellâhü ahsenül-hâlıkîn",meaning:"Yaratıcıların en güzeli",count:33,time:"Her namaz sonrası"}]},
+        {order:12,arabic:"ٱلْبَارِئُ",name:"El-Bâri",meaning:"Kusursuz yaratan",ebced:213,element:"Toprak",zikirCount:213,days:["Çarşamba","Cumartesi"],hours:["07:00-09:00","13:00-15:00"],moonPhase:"İlk Dördün",detail:"El-Bâri, yarattıklarını kusursuz kılan demektir.",traits:["Düzen ve uyum","Mükemmeliyetçilik","Planlı yapı"],powers:["Düzenli hayat","Uyum ve denge","Planlama yeteneği"],faziletler:["Her gün 213 defa zikredene düzen nasip olur"],zikirler:[{text:"Yâ Bâri",meaning:"Ey kusursuz yaratan",count:213,time:"Sabah namazı sonrası"},{text:"Allâhümme barî lenâ",meaning:"Allah'ım bize düzen ver",count:33,time:"Her namaz sonrası"}]},
+        {order:13,arabic:"ٱلْمُصَوِّرُ",name:"El-Musavvir",meaning:"Şekil veren",ebced:546,element:"Toprak",zikirCount:546,days:["Pazar","Çarşamba"],hours:["08:00-10:00","14:00-16:00"],moonPhase:"İlk Dördün",detail:"El-Musavvir, varlıklara biçim veren demektir.",traits:["Estetik anlayış","Görsel yetenek","Güzellik algısı"],powers:["Fiziksel güzellik","Estetik anlayış","Sanatsal yetenek"],faziletler:["Her gün 546 defa zikredene güzellik nasip olur"],zikirler:[{text:"Yâ Musavvir",meaning:"Ey şekil veren",count:546,time:"Sabah namazı sonrası"},{text:"Allâhümme hassin sûretî",meaning:"Allah'ım suretimi güzelleştir",count:21,time:"Sabah ve akşam"}]},
+        {order:14,arabic:"ٱلْغَفَّارُ",name:"El-Gaffâr",meaning:"Sürekli bağışlayan",ebced:1281,element:"Su",zikirCount:1281,days:["Cuma","Pazartesi"],hours:["03:00-05:00","22:00-00:00"],moonPhase:"Son Dördün",detail:"El-Gaffâr, günahları sürekli bağışlayan demektir.",traits:["Bağışlayıcılık","Tevbe ehli","Affedicilik"],powers:["Günahların affı","Tevbenin kabulü","Manevi arınma"],faziletler:["Her gün 1281 defa zikredene günahların affı nasip olur"],zikirler:[{text:"Yâ Gaffâr",meaning:"Ey sürekli bağışlayan",count:1281,time:"Sehde iken"},{text:"Estağfirullâhe'l-azîm",meaning:"Yüce Allah'tan bağışlanma dilerim",count:100,time:"Her namaz sonrası"}]},
+        {order:15,arabic:"ٱلْقَهَّارُ",name:"El-Kahhâr",meaning:"Her şeye galip gelen",ebced:306,element:"Ateş",zikirCount:306,days:["Salı","Pazar"],hours:["07:00-09:00","19:00-21:00"],moonPhase:"Dolunay",detail:"El-Kahhâr, her şeye galip gelen demektir.",traits:["Galibiyet","Korunma","Otorite"],powers:["Düşmanlara karşı korunma","Manevi güç","Cesaret"],faziletler:["Her gün 306 defa zikredene galibiyet nasip olur"],zikirler:[{text:"Yâ Kahhâr",meaning:"Ey her şeye galip gelen",count:306,time:"Sabah namazı sonrası"},{text:"Hasbiyellâh",meaning:"Allah bana yeter",count:7,time:"Tehlike anlarında"}]},
+        {order:16,arabic:"ٱلْوَهَّابُ",name:"El-Vehhâb",meaning:"Sınırsız veren",ebced:19,element:"Hava",zikirCount:114,days:["Perşembe","Cuma"],hours:["06:00-08:00","12:00-14:00"],moonPhase:"Hilal",detail:"El-Vehhâb, karşılıksız veren demektir.",traits:["Cömertlik","Bereket","Verme duygusu"],powers:["Rızık bolluğu","Maddi bereket","Cömertlik"],faziletler:["Her gün 114 defa zikredene rızık kapıları açılır"],zikirler:[{text:"Yâ Vehhâb",meaning:"Ey sınırsız veren",count:114,time:"Sabah namazı sonrası"},{text:"Rabbenâ lâ tuziğ kulûbenâ",meaning:"Rabbimiz kalplerimizi eğriltme",count:7,time:"Her namaz sonrası"}]},
+        {order:17,arabic:"ٱلرَّزَّاقُ",name:"Er-Rezzâk",meaning:"Rızık veren",ebced:318,element:"Toprak",zikirCount:318,days:["Perşembe","Cuma"],hours:["07:00-09:00","10:00-12:00"],moonPhase:"Hilal",detail:"Er-Rezzâk, tüm canlıların rızkını veren demektir.",traits:["Rızık bilinci","Bereket","Güven"],powers:["Rızık bolluğu","Maddi rahatlık","İş açılımı"],faziletler:["Her gün 318 defa zikredene bolluk nasip olur"],zikirler:[{text:"Yâ Rezzâk",meaning:"Ey rızık veren",count:318,time:"Sabah namazı sonrası"},{text:"Allâhümmeftah lî ebvâbe rızkık",meaning:"Rızık kapılarını aç",count:41,time:"Sabah namazı sonrası"}]},
+        {order:18,arabic:"ٱلْفَتَّاحُ",name:"El-Fettâh",meaning:"Kapıları açan",ebced:488,element:"Ateş",zikirCount:488,days:["Cuma","Pazar"],hours:["06:00-08:00","14:00-16:00"],moonPhase:"Hilal",detail:"El-Fettâh, kapıları açan, fetih sahibi demektir.",traits:["Açılım","Fetih ruhu","Çözüm üretme"],powers:["Kapıların açılması","İşlerde açılım","Zafer"],faziletler:["Her gün 488 defa zikredene kapılar açılır"],zikirler:[{text:"Yâ Fettâh",meaning:"Ey kapıları açan",count:488,time:"Sabah namazı sonrası"},{text:"Rabbi yessir velâ tuassir",meaning:"Rabbim kolaylaştır",count:21,time:"Her zor işe başlamadan"}]},
+        {order:19,arabic:"ٱلْعَلِيمُ",name:"El-Alîm",meaning:"Her şeyi bilen",ebced:150,element:"Hava",zikirCount:150,days:["Çarşamba","Perşembe"],hours:["05:00-07:00","09:00-11:00"],moonPhase:"İlk Dördün",detail:"El-Alîm, gizli ve açık her şeyi bilen demektir.",traits:["İlim aşkı","Bilgelik","Anlayış"],powers:["İlim ve bilgi","Hafıza güçlenmesi","Bilgelik"],faziletler:["Her gün 150 defa zikredene ilim nasip olur"],zikirler:[{text:"Yâ Alîm",meaning:"Ey her şeyi bilen",count:150,time:"Sabah namazı sonrası"},{text:"Rabbi zidnî ilmen",meaning:"Rabbim ilmimi artır",count:33,time:"Ders çalışmadan önce"}]},
+        {order:20,arabic:"ٱلْقَابِضُ",name:"El-Kâbız",meaning:"Darlık veren",ebced:153,element:"Toprak",zikirCount:153,days:["Cumartesi","Salı"],hours:["18:00-20:00","22:00-00:00"],moonPhase:"Son Dördün",detail:"El-Kâbız, darlık ve bolluk veren demektir.",traits:["Sabır","Tevekkül","Kabulleniş"],powers:["Sabır gücü","Tevekkül","İçsel denge"],faziletler:["Her gün 153 defa zikredene sabır nasip olur"],zikirler:[{text:"Yâ Kâbızü yâ Bâsıt",meaning:"Ey sıkan ve genişleten",count:153,time:"Zor zamanlarda"},{text:"Lâ havle velâ kuvvete illâ billâh",meaning:"Güç ancak Allah'tandır",count:100,time:"Her zorluk anında"}]}
+    ];
+
+    const cities = ["İstanbul, Türkiye","Ankara, Türkiye","İzmir, Türkiye","Bursa, Türkiye","Antalya, Türkiye","Adana, Türkiye","Konya, Türkiye","Gaziantep, Türkiye","Diyarbakır, Türkiye","Mersin, Türkiye","Kayseri, Türkiye","Eskişehir, Türkiye","Samsun, Türkiye","Trabzon, Türkiye","Denizli, Türkiye","Malatya, Türkiye","Erzurum, Türkiye","Van, Türkiye","Şanlıurfa, Türkiye","Sakarya, Türkiye","Berlin, Almanya","Münih, Almanya","Londra, İngiltere","Paris, Fransa","New York, ABD","Viyana, Avusturya","Amsterdam, Hollanda","Kahire, Mısır","Mekke, Suudi Arabistan","Medine, Suudi Arabistan","Bağdat, Irak","Şam, Suriya","Kudüs, Filistin","Tahran, İran","Bakü, Azerbaycan"];
+
+    // ===================================================================
+    // ASTROLOGY HELPERS
+    // ===================================================================
+    const SIGNS = ['Koç','Boğa','İkizler','Yengeç','Aslan','Başak','Terazi','Akrep','Yay','Oğlak','Kova','Balık'];
+    const SYMBOLS = ['♈','♉','♊','♋','♌','♍','♎','♏','♐','♑','♒','♓'];
+    const ELEMENTS = ['Ateş','Toprak','Hava','Su','Ateş','Toprak','Hava','Su','Ateş','Toprak','Hava','Su'];
+
+    function getSunSign(month, day) {
+        const m = parseInt(month), d = parseInt(day);
+        const ranges = [[1,20],[2,19],[3,21],[4,20],[5,21],[6,21],[7,23],[8,23],[9,23],[10,23],[11,22],[12,22]];
+        for (let i = 11; i >= 0; i--) {
+            if (m > ranges[i][0] || (m === ranges[i][0] && d >= ranges[i][1])) return i;
+        }
+        return 9; // Oğlak
+    }
+
+    function getSign(idx) { return SIGNS[((idx % 12) + 12) % 12]; }
+    function getSymbol(idx) { return SYMBOLS[((idx % 12) + 12) % 12]; }
+    function getElement(idx) { return ELEMENTS[((idx % 12) + 12) % 12]; }
+    function getSignIdx(name) { return SIGNS.indexOf(name); }
+
+    // ===================================================================
+    // INIT
+    // ===================================================================
+    document.addEventListener('DOMContentLoaded', () => {
+        initStarField();
+        initSelects();
+        initEventListeners();
+        initPalmistryDragDrop();
+        initRadioButtons();
+    });
+
+    function initStarField() {
+        const sf = document.getElementById('starField');
+        for (let i = 0; i < 50; i++) {
+            const s = document.createElement('div');
+            s.className = 'star';
+            s.style.cssText = `left:${Math.random()*100}%;top:${Math.random()*100}%;animation-delay:${Math.random()*3}s;animation-duration:${2+Math.random()*3}s`;
+            sf.appendChild(s);
+        }
+    }
+
+    function initSelects() {
+        const d = document.getElementById('birthDay');
+        for (let i=1;i<=31;i++) d.innerHTML += `<option value="${i}">${i}</option>`;
+        const y = document.getElementById('birthYear');
+        for (let i=2024;i>=1940;i--) y.innerHTML += `<option value="${i}">${i}</option>`;
+        const h = document.getElementById('birthHour');
+        for (let i=0;i<=23;i++) h.innerHTML += `<option value="${i}">${String(i).padStart(2,'0')}</option>`;
+        const m = document.getElementById('birthMinute');
+        for (let i=0;i<=59;i++) m.innerHTML += `<option value="${i}">${String(i).padStart(2,'0')}</option>`;
+    }
+
+    function initRadioButtons() {
+        document.querySelectorAll('input[type="radio"]').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const name = this.name;
+                document.querySelectorAll(`input[name="${name}"]`).forEach(r => {
+                    r.closest('label').classList.remove('border-amber-500/30');
+                });
+                this.closest('label').classList.add('border-amber-500/30');
+            });
+        });
+    }
+
+    // ===================================================================
+    // EVENT LISTENERS
+    // ===================================================================
+    function initEventListeners() {
+        const inputName = document.getElementById('inputName');
+        const inputPhone = document.getElementById('inputPhone');
+        const agreeTerms = document.getElementById('agreeTerms');
+        const btnStep1Next = document.getElementById('btnStep1Next');
+
+        function v1() {
+            btnStep1Next.disabled = !(inputName.value.trim().length >= 2 && inputPhone.value.replace(/\D/g,'').length >= 10 && agreeTerms.checked);
+        }
+        inputName.addEventListener('input', v1);
+        inputPhone.addEventListener('input', e => {
+            let v = e.target.value.replace(/\D/g,'');
+            if (v.length>10) v=v.substring(0,10);
+            if (v.length>5) v=v.substring(0,5)+' '+v.substring(5);
+            if (v.length>8) v=v.substring(0,8)+' '+v.substring(8);
+            if (v.length>11) v=v.substring(0,11)+' '+v.substring(11);
+            e.target.value = v; v1();
+        });
+        agreeTerms.addEventListener('change', v1);
+        btnStep1Next.addEventListener('click', () => {
+            userData.name = inputName.value.trim();
+            userData.phone = document.getElementById('phoneCode').value + ' ' + inputPhone.value;
+            userData.email = document.getElementById('inputEmail').value;
+            goToStep(2);
+        });
+
+        // Step 2
+        const bd = document.getElementById('birthDay'), bm = document.getElementById('birthMonth'), by = document.getElementById('birthYear');
+        const bc = document.getElementById('birthCity'), cs = document.getElementById('citySuggestions');
+        const ut = document.getElementById('unknownTime'), btn2 = document.getElementById('btnStep2Next');
+
+        function v2() {
+            const dateOk = bd.value && bm.value && by.value;
+            const cityOk = bc.value.trim().length >= 2;
+            const timeOk = ut.checked || (document.getElementById('birthHour').value !== '' && document.getElementById('birthMinute').value !== '');
+            btn2.disabled = !(dateOk && cityOk && timeOk);
+        }
+        [bd,bm,by].forEach(el => el.addEventListener('change', v2));
+        document.getElementById('birthHour').addEventListener('change', v2);
+        document.getElementById('birthMinute').addEventListener('change', v2);
+        
+        bc.addEventListener('input', e => {
+            v2();
+            const val = e.target.value.toLowerCase();
+            if (val.length < 2) { cs.classList.add('hidden'); return; }
+            const matches = cities.filter(c => c.toLowerCase().includes(val));
+            if (matches.length) {
+                cs.innerHTML = matches.map(c => `<div class="px-4 py-2 text-sm hover:bg-white/10 cursor-pointer" onclick="selectCity('${c}')">${c}</div>`).join('');
+                cs.classList.remove('hidden');
+            } else cs.classList.add('hidden');
+        });
+        ut.addEventListener('change', () => {
+            document.getElementById('birthHour').disabled = ut.checked;
+            document.getElementById('birthMinute').disabled = ut.checked;
+            v2();
+        });
+        document.getElementById('btnStep2Back').addEventListener('click', () => goToStep(1));
+        btn2.addEventListener('click', () => {
+            userData.birthDay = bd.value; userData.birthMonth = bm.value; userData.birthYear = by.value;
+            userData.birthHour = ut.checked ? null : document.getElementById('birthHour').value;
+            userData.birthMinute = ut.checked ? null : document.getElementById('birthMinute').value;
+            userData.birthCity = bc.value;
+            userData.wantAstrology = document.getElementById('wantAstrology').checked;
+            goToStep(3); startCountdown(); maskPhone();
+        });
+
+        // Step 3
+        const otpInputs = document.querySelectorAll('.otp-input');
+        const btn3 = document.getElementById('btnStep3Next');
+        otpInputs.forEach((input, idx) => {
+            input.addEventListener('input', e => {
+                e.target.value = e.target.value.replace(/\D/g,'');
+                if (e.target.value && idx < otpInputs.length-1) otpInputs[idx+1].focus();
+                let code = ''; otpInputs.forEach(i => code += i.value);
+                btn3.disabled = code.length !== 6;
+            });
+            input.addEventListener('keydown', e => { if (e.key==='Backspace' && !e.target.value && idx>0) otpInputs[idx-1].focus(); });
+        });
+        document.getElementById('btnStep3Back').addEventListener('click', () => goToStep(2));
+        btn3.addEventListener('click', () => {
+            let code = ''; otpInputs.forEach(i => code += i.value);
+            if (code === '123456') {
+                document.getElementById('verifyError').classList.add('hidden');
+                userData.verified = true;
+                goToStep(4); processResults();
+            } else {
+                document.getElementById('verifyError').classList.remove('hidden');
+                otpInputs.forEach(i => { i.value=''; i.style.borderColor='rgba(239,68,68,0.5)'; });
+                otpInputs[0].focus();
+                setTimeout(() => otpInputs.forEach(i => i.style.borderColor=''), 2000);
+            }
+        });
+    }
+
+    // ===================================================================
+    // PALMISTRY - Drag & Drop
+    // ===================================================================
+    function initPalmistryDragDrop() {
+        const zone = document.getElementById('uploadZone');
+        if (!zone) return;
+
+        zone.addEventListener('dragover', e => { e.preventDefault(); zone.classList.add('dragover'); });
+        zone.addEventListener('dragleave', () => zone.classList.remove('dragover'));
+        zone.addEventListener('drop', e => {
+            e.preventDefault(); zone.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                processPalmImageFile(files[0]);
+            }
+        });
+    }
+
+    function handlePalmImage(event) {
+        const file = event.target.files[0];
+        if (file) processPalmImageFile(file);
+    }
+
+    function processPalmImageFile(file) {
+        if (file.size > 10 * 1024 * 1024) {
+            alert('Dosya boyutu 10MB\'dan küçük olmalıdır.');
+            return;
+        }
+
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            palmImageBase64 = e.target.result;
+            document.getElementById('palmPreviewImg').src = palmImageBase64;
+            document.getElementById('uploadPlaceholder').classList.add('hidden');
+            document.getElementById('uploadPreview').classList.remove('hidden');
+            document.getElementById('uploadZone').classList.add('has-image');
+            document.getElementById('handSelection').style.display = 'flex';
+            document.getElementById('genderSelection').style.display = 'flex';
+            document.getElementById('analyzePalmBtn').style.display = 'block';
+        };
+        reader.readAsDataURL(file);
+    }
+
+    // ===================================================================
+    // PALMISTRY ANALYSIS - Gerçek MCP Entegrasyonu
+    // ===================================================================
+    async function analyzePalm() {
+        if (!palmImageBase64) return;
+
+        const btn = document.getElementById('analyzePalmBtn');
+        const progress = document.getElementById('palmAnalysisProgress');
+        const results = document.getElementById('palmResults');
+        const statusEl = document.getElementById('palmAnalysisStatus');
+
+        btn.disabled = true;
+        btn.textContent = '⏳ Analiz Ediliyor...';
+        progress.classList.remove('hidden');
+        results.classList.add('hidden');
+
+        const handSide = document.querySelector('input[name="handSide"]:checked')?.value || 'right';
+        const gender = document.querySelector('input[name="palmGender"]:checked')?.value || 'female';
+
+        const steps = ['palmStep1','palmStep2','palmStep3','palmStep4','palmStep5'];
+        const statusTexts = [
+            'Görüntü işleme ve çizgi tespiti yapılıyor...',
+            'Ana çizgiler sınıflandırılıyor...',
+            'Mount bölgeleri analiz ediliyor...',
+            'RAG dokümantasyonundan eşleştirme yapılıyor...',
+            'Kapsamlı yorum oluşturuluyor...'
+        ];
+
+        // Animate steps
+        for (let i = 0; i < steps.length; i++) {
+            await new Promise(r => setTimeout(r, 800));
+            if (i > 0) document.getElementById(steps[i-1]).classList.replace('active','completed');
+            document.getElementById(steps[i]).classList.add('active');
+            statusEl.textContent = statusTexts[i];
+        }
+
+        try {
+            // GERÇEK MCP ÇAĞRISI
+            const metadata = {
+                handSide,
+                gender,
+                name: userData.name || 'Kullanıcı',
+                birthData: {
+                    day: userData.birthDay,
+                    month: userData.birthMonth,
+                    year: userData.birthYear,
+                    city: userData.birthCity
+                }
+            };
+
+            const response = await appService.analyzePalmistry(palmImageBase64, metadata);
+            lastPalmResult = response;
+
+            // Mark all steps complete
+            steps.forEach(s => {
+                document.getElementById(s).classList.remove('active');
+                document.getElementById(s).classList.add('completed');
+            });
+
+            renderPalmResults(response);
+            results.classList.remove('hidden');
+            document.getElementById('palmStructuredOutput').classList.remove('hidden');
+            document.getElementById('palmJSONContainer').textContent = JSON.stringify(response, null, 2);
+
+        } catch (err) {
+            console.error('Palmistry analysis error:', err);
+            statusEl.textContent = '❌ Hata: ' + err.message;
+            
+            // Show error in results area
+            results.classList.remove('hidden');
+            results.innerHTML = `
+                <div class="ai-response-card" style="border-color: rgba(239,68,68,0.3);">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="text-lg">❌</span>
+                        <h5 class="text-sm font-bold text-red-400">Analiz Hatası</h5>
+                    </div>
+                    <p class="text-sm text-gray-300 mb-3">${err.message}</p>
+                    <p class="text-xs text-gray-500 mb-4">Lütfen MCP sunucusunun çalıştığından ve bağlantının aktif olduğundan emin olun.</p>
+                    <div class="flex gap-2">
+                        <button class="btn-secondary px-4 py-2 rounded-lg text-xs" onclick="analyzePalm()">🔄 Tekrar Dene</button>
+                        <button class="btn-secondary px-4 py-2 rounded-lg text-xs" onclick="resetPalmUpload()">📸 Yeni Fotoğraf</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        btn.disabled = false;
+        btn.textContent = '🔍 El Falı Analizini Başlat';
+    }
+
+    function renderPalmResults(data) {
+        const container = document.getElementById('palmResults');
+        
+        if (!data || !data.content) {
+            container.innerHTML = '<p class="text-sm text-gray-400">Analiz sonucu alınamadı.</p>';
+            return;
+        }
+
+        // Parse MCP response content
+        let parsed = data;
+        if (data.content && Array.isArray(data.content)) {
+            const textContent = data.content.find(c => c.type === 'text');
+            if (textContent) {
+                try { parsed = JSON.parse(textContent.text); } catch(e) { parsed = { raw: textContent.text }; }
+            }
+        }
+
+        const palmData = parsed.data || parsed;
+        
+        let html = '';
+
+        // Summary
+        if (palmData.summary) {
+            html += `
+                <div class="ai-response-card mb-4">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="text-lg">🤲</span>
+                        <h5 class="text-sm font-bold text-white">Genel El Analizi</h5>
+                    </div>
+                    <p class="text-sm text-gray-300 leading-relaxed">${palmData.summary}</p>
+                    ${palmData.hand_type ? `<p class="text-xs text-amber-400 mt-2">El Tipi: ${palmData.hand_type}</p>` : ''}
+                </div>
+            `;
+        }
+
+        // Major Lines
+        if (palmData.lines && Array.isArray(palmData.lines)) {
+            html += '<div class="space-y-3 mb-4">';
+            palmData.lines.forEach(line => {
+                const lineColors = {
+                    'heart': '#ef4444', 'head': '#3b82f6', 'life': '#22c55e',
+                    'fate': '#a855f7', 'sun': '#eab308', 'health': '#06b6d4',
+                    'marriage': '#ec4899'
+                };
+                const lineNames = {
+                    'heart': '❤️ Kalp Çizgisi', 'head': '🧠 Baş Çizgisi', 'life': '🌿 Hayat Çizgisi',
+                    'fate': '⭐ Kader Çizgisi', 'sun': '☀️ Güneş Çizgisi', 'health': '💚 Sağlık Çizgisi',
+                    'marriage': '💍 Evlilik Çizgisi'
+                };
+                const color = lineColors[line.type] || '#d4af37';
+                const name = lineNames[line.type] || line.type;
+
+                html += `
+                    <div class="palm-line-card">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-bold text-white">${name}</span>
+                            <span class="info-badge px-2 py-0.5 rounded text-xs">${line.strength || 'Orta'}</span>
+                        </div>
+                        <div class="line-indicator" style="background:${color}20;">
+                            <div class="line-strength-bar" style="width:${line.strength_percent || 50}%;background:${color};"></div>
+                        </div>
+                        <p class="text-xs text-gray-400 mb-2">Uzunluk: ${line.length || 'Orta'} | Derinlik: ${line.depth || 'Orta'} | Form: ${line.shape || 'Düz'}</p>
+                        <p class="text-sm text-gray-300 leading-relaxed">${line.interpretation}</p>
+                        ${line.sub_lines && line.sub_lines.length > 0 ? `
+                            <div class="mt-2 pt-2 border-t border-gray-700/30">
+                                <p class="text-xs text-gray-500 mb-1">Alt çizgiler:</p>
+                                ${line.sub_lines.map(s => `<p class="text-xs text-gray-400">• ${s}</p>`).join('')}
+                            </div>
+                        ` : ''}
+                    </div>
+                `;
+            });
+            html += '</div>';
+        }
+
+        // Mounts
+        if (palmData.mounts && Array.isArray(palmData.mounts)) {
+            html += `
+                <div class="esma-card rounded-2xl p-6 mb-4">
+                    <h4 class="text-sm font-bold text-amber-400 mb-4">🏔️ Mount (Tepe) Analizi</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            `;
+            palmData.mounts.forEach(mount => {
+                html += `
+                    <div class="glass-card-light rounded-xl p-3">
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-sm font-bold text-white">${mount.name}</span>
+                            <span class="text-xs text-amber-400">${mount.development || 'Orta'}</span>
+                        </div>
+                        <p class="text-xs text-gray-400">${mount.interpretation}</p>
+                    </div>
+                `;
+            });
+            html += '</div></div>';
+        }
+
+        // Fingers
+        if (palmData.fingers && Array.isArray(palmData.fingers)) {
+            html += `
+                <div class="esma-card rounded-2xl p-6 mb-4">
+                    <h4 class="text-sm font-bold text-amber-400 mb-4">🖐️ Parmak Analizi</h4>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            `;
+            palmData.fingers.forEach(finger => {
+                html += `
+                    <div class="glass-card-light rounded-xl p-3">
+                        <span class="text-sm font-bold text-white">${finger.name}</span>
+                        <p class="text-xs text-gray-400 mt-1">Uzunluk: ${finger.length} | Şekil: ${finger.shape}</p>
+                        <p class="text-xs text-gray-300 mt-1">${finger.interpretation}</p>
+                    </div>
+                `;
+            });
+            html += '</div></div>';
+        }
+
+        // Special Marks
+        if (palmData.special_marks && palmData.special_marks.length > 0) {
+            html += `
+                <div class="esma-card rounded-2xl p-6">
+                    <h4 class="text-sm font-bold text-amber-400 mb-4">✨ Özel İşaretler</h4>
+                    <div class="space-y-2">
+            `;
+            palmData.special_marks.forEach(mark => {
+                html += `
+                    <div class="flex items-start gap-3">
+                        <span class="text-amber-400">✦</span>
+                        <div>
+                            <p class="text-sm text-white font-bold">${mark.name}</p>
+                            <p class="text-xs text-gray-400">${mark.location}</p>
+                            <p class="text-xs text-gray-300 mt-1">${mark.interpretation}</p>
+                        </div>
+                    </div>
+                `;
+            });
+            html += '</div></div>';
+        }
+
+        container.innerHTML = html || '<p class="text-sm text-gray-400">Analiz sonucu boş döndü.</p>';
+    }
+
+    function resetPalmUpload() {
+        palmImageBase64 = null;
+        document.getElementById('palmPreviewImg').src = '';
+        document.getElementById('uploadPlaceholder').classList.remove('hidden');
+        document.getElementById('uploadPreview').classList.add('hidden');
+        document.getElementById('uploadZone').classList.remove('has-image');
+        document.getElementById('handSelection').style.display = 'none';
+        document.getElementById('genderSelection').style.display = 'none';
+        document.getElementById('analyzePalmBtn').style.display = 'none';
+        document.getElementById('palmAnalysisProgress').classList.add('hidden');
+        document.getElementById('palmResults').classList.add('hidden');
+        document.getElementById('palmResults').innerHTML = '';
+        document.getElementById('palmStructuredOutput').classList.add('hidden');
+        document.getElementById('palmImageInput').value = '';
+        ['palmStep1','palmStep2','palmStep3','palmStep4','palmStep5'].forEach(s => {
+            const el = document.getElementById(s);
+            el.classList.remove('active','completed');
+        });
+    }
+
+    function togglePalmJSON() {
+        document.getElementById('palmJSONContainer').classList.toggle('hidden');
+    }
+
+    // ===================================================================
+    // ASTROLOGY - Gerçek MCP Entegrasyonu
+    // ===================================================================
+    async function requestAstrologyAnalysis(analysisType) {
+        const thinkingEl = document.getElementById('astrologyThinking');
+        const container = document.getElementById('astrologyResponseContainer');
+
+        thinkingEl.classList.remove('hidden');
+        container.innerHTML = '';
+
+        try {
+            const birthData = {
+                name: userData.name,
+                day: parseInt(userData.birthDay),
+                month: parseInt(userData.birthMonth),
+                year: parseInt(userData.birthYear),
+                hour: parseInt(userData.birthHour) || 12,
+                minute: parseInt(userData.birthMinute) || 0,
+                city: userData.birthCity
+            };
+
+            const response = await appService.analyzeAstrology(birthData, analysisType);
+            lastAstroResult = response;
+            thinkingEl.classList.add('hidden');
+            renderAstrologyResponse(response, analysisType);
+
+        } catch (err) {
+            thinkingEl.classList.add('hidden');
+            container.innerHTML = `
+                <div class="ai-response-card" style="border-color: rgba(239,68,68,0.3);">
+                    <p class="text-red-400 text-sm">❌ Analiz hatası: ${err.message}</p>
+                    <p class="text-xs text-gray-500 mt-2">MCP sunucusuna bağlanılamadı. Sunucunun çalıştığından emin olun.</p>
+                    <button class="btn-secondary px-4 py-2 rounded-lg text-xs mt-3" onclick="requestAstrologyAnalysis('${analysisType}')">🔄 Tekrar Dene</button>
+                </div>
+            `;
+        }
+    }
+
+    function renderAstrologyResponse(data, type) {
+        const container = document.getElementById('astrologyResponseContainer');
+        
+        let parsed = data;
+        if (data.content && Array.isArray(data.content)) {
+            const textContent = data.content.find(c => c.type === 'text');
+            if (textContent) {
+                try { parsed = JSON.parse(textContent.text); } catch(e) { parsed = { raw: textContent.text }; }
+            }
+        }
+
+        const astroData = parsed.data || parsed;
+
+        let html = `<div class="ai-response-card">`;
+        html += `<div class="flex items-center gap-2 mb-3"><span class="text-lg">🤖</span><h5 class="text-sm font-bold text-white">AI Astroloji Analizi</h5></div>`;
+        
+        // Render based on type
+        if (astroData.sun || astroData.moon || astroData.rising) {
+            if (astroData.sun) {
+                html += `<div class="result-section mb-3"><p class="text-xs font-bold text-amber-400 mb-1">☉ Güneş ${astroData.sun.sign || ''}</p><p class="text-xs text-gray-300">${astroData.sun.interpretation || ''}</p></div>`;
+            }
+            if (astroData.moon) {
+                html += `<div class="result-section mb-3"><p class="text-xs font-bold text-amber-400 mb-1">☽ Ay ${astroData.moon.sign || ''}</p><p class="text-xs text-gray-300">${astroData.moon.interpretation || ''}</p></div>`;
+            }
+            if (astroData.rising) {
+                html += `<div class="result-section mb-3"><p class="text-xs font-bold text-amber-400 mb-1">↑ Yükselen ${astroData.rising.sign || ''}</p><p class="text-xs text-gray-300">${astroData.rising.interpretation || ''}</p></div>`;
+            }
+        }
+
+        if (astroData.planets && Array.isArray(astroData.planets)) {
+            html += `<div class="grid grid-cols-2 gap-2 mb-3">`;
+            astroData.planets.forEach(p => {
+                html += `<div class="glass-card-light rounded-lg p-2"><p class="text-xs font-bold text-white">${p.symbol || ''} ${p.planet || ''}</p><p class="text-xs text-amber-400">${p.sign || ''} ${p.degree || ''}</p><p class="text-xs text-gray-400 mt-1">${p.interpretation || ''}</p></div>`;
+            });
+            html += `</div>`;
+        }
+
+        if (astroData.lines && Array.isArray(astroData.lines)) {
+            astroData.lines.forEach(l => {
+                html += `<div class="result-section mb-2"><p class="text-xs text-gray-300">${l}</p></div>`;
+            });
+        }
+
+        if (astroData.summary) {
+            html += `<div class="p-3 glass-card-light rounded-xl mt-3"><p class="text-xs text-gray-300">${astroData.summary}</p></div>`;
+        }
+
+        if (astroData.spiritual_synthesis) {
+            html += `<div class="p-3 glass-card-light rounded-xl mt-3"><p class="text-xs font-bold text-amber-400 mb-1">✨ Ruhsal Sentez</p><p class="text-xs text-gray-300">${astroData.spiritual_synthesis}</p></div>`;
+        }
+
+        if (astroData.raw) {
+            html += `<pre class="text-xs text-gray-400 whitespace-pre-wrap mt-3">${astroData.raw}</pre>`;
+        }
+
+        html += `</div>`;
+        container.innerHTML = html;
+    }
+
+    // ===================================================================
+    // NAVIGATION
+    // ===================================================================
+    function goToStep(step) {
+        document.querySelectorAll('.wizard-step').forEach(el => el.classList.add('hidden'));
+        const el = document.getElementById(`step${step}`);
+        el.classList.remove('hidden');
+        el.style.animation = 'none'; el.offsetHeight; el.style.animation = '';
+
+        for (let i=1;i<=4;i++) {
+            const c = document.getElementById(`step${i}Circle`);
+            c.className = 'step-indicator w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ';
+            if (i<step) { c.className+='step-completed'; c.innerHTML='✓'; }
+            else if (i===step) { c.className+='step-active'; c.innerHTML=i; }
+            else { c.className+='step-pending'; c.innerHTML=i; }
+        }
+        for (let i=1;i<=3;i++) document.getElementById(`progress${i}`).style.width = i<step?'100%':'0%';
+        currentStep = step;
+    }
+
+    function selectCity(city) {
+        document.getElementById('birthCity').value = city;
+        document.getElementById('citySuggestions').classList.add('hidden');
+        document.getElementById('birthCity').dispatchEvent(new Event('input'));
+    }
+
+    function maskPhone() {
+        const p = userData.phone;
+        document.getElementById('maskedPhone').textContent = p.substring(0,4)+' 5'+'X'.repeat(2)+' '+'X'.repeat(3)+' '+'X'.repeat(2)+p.slice(-2);
+    }
+
+    function startCountdown() {
+        let s=60; const el=document.getElementById('countdown'), rb=document.getElementById('resendBtn');
+        rb.classList.add('hidden'); document.getElementById('resendTimer').classList.remove('hidden');
+        if (countdownInterval) clearInterval(countdownInterval);
+        countdownInterval = setInterval(()=>{s--;el.textContent=s;if(s<=0){clearInterval(countdownInterval);document.getElementById('resendTimer').classList.add('hidden');rb.classList.remove('hidden');}},1000);
+    }
+
+    function resendCode() {
+        startCountdown();
+        document.querySelectorAll('.otp-input').forEach(i=>i.value='');
+        document.querySelectorAll('.otp-input')[0].focus();
+    }
+
+    // ===================================================================
+    // RESULTS
+    // ===================================================================
+    function processResults() {
+        const ls = document.getElementById('loadingState'), rc = document.getElementById('resultsContent'), lt = document.getElementById('loadingText');
+        ls.classList.remove('hidden'); rc.classList.add('hidden');
+
+        const steps = [
+            {text:'Ebced değeri hesaplanıyor...',d:600},
+            {text:'Esma-ül Hüsna eşleştiriliyor...',d:1200},
+            {text:'Zikir programı hazırlanıyor...',d:1800},
+            {text:'Hayırlı zamanlar belirleniyor...',d:2400},
+            {text:'Sonuçlar derleniyor...',d:3000}
+        ];
+        steps.forEach(s => setTimeout(()=>{ lt.textContent=s.text; }, s.d));
+
+        setTimeout(() => {
+            try {
+                calculateAndDisplay();
+                ls.classList.add('hidden');
+                rc.classList.remove('hidden');
+            } catch(err) {
+                console.error('Display error:', err);
+                lt.textContent = 'Hata: ' + err.message;
+                setTimeout(()=>{ ls.classList.add('hidden'); rc.classList.remove('hidden'); }, 2000);
+            }
+        }, 3500);
+    }
+
+    function calculateEbced(name) {
+        let total = 0;
+        const clean = name.replace(/[^a-zA-ZçğıöşüÇĞİÖŞÜ]/g,'');
+        for (let ch of clean) {
+            const ar = turkishToArabic[ch];
+            if (ar && arabicLetterValues[ar]) total += arabicLetterValues[ar];
+        }
+        return total || 1;
+    }
+
+    function findMatchingEsma(val) {
+        let closest = esmaulHusna[0], min = Infinity;
+        for (let e of esmaulHusna) { const d = Math.abs(e.ebced-val); if(d<min){min=d;closest=e;} }
+        return closest;
+    }
+
+    function calculateAndDisplay() {
+        const ebced = calculateEbced(userData.name);
+        const esma = findMatchingEsma(ebced);
+        userData.ebcedValue = ebced;
+        userData.matchedEsma = esma;
+
+        document.getElementById('resultName').textContent = userData.name;
+        document.getElementById('resultEbcedNum').textContent = ebced;
+        document.getElementById('ebcedValue').textContent = ebced;
+        document.getElementById('esmaOrder').textContent = esma.order;
+        document.getElementById('zikirCount').textContent = esma.zikirCount;
+        document.getElementById('esmaElement').textContent = esma.element;
+        document.getElementById('esmaArabic').textContent = esma.arabic;
+        document.getElementById('esmaName').textContent = esma.name;
+        document.getElementById('esmaMeaning').textContent = esma.meaning;
+        document.getElementById('esmaDetail').textContent = esma.detail;
+
+        document.getElementById('spiritualTraits').innerHTML = esma.traits.map(t=>`<div class="glass-card-light rounded-xl p-3 flex items-center gap-2"><span class="text-amber-400">✦</span><span class="text-sm text-gray-300">${t}</span></div>`).join('');
+        document.getElementById('spiritualPowers').innerHTML = esma.powers.map(p=>`<li class="flex items-start gap-2"><span class="text-amber-400 mt-0.5">⚡</span><span class="text-sm text-gray-300">${p}</span></li>`).join('');
+
+        const z = esma.zikirler||[];
+        document.getElementById('zikirProgram').innerHTML = z.map(x=>`<div class="glass-card-light rounded-xl p-4"><div class="flex items-center justify-between mb-2"><span class="font-amiri text-xl gold-text">${x.text}</span><span class="info-badge px-2 py-1 rounded-full text-xs">${x.count} defa</span></div><p class="text-xs text-gray-400">${x.meaning}</p><p class="text-xs text-amber-400/70 mt-1">⏰ ${x.time}</p></div>`).join('');
+        document.getElementById('zikirMeanings').innerHTML = z.map(x=>`<div class="result-section"><p class="text-sm font-bold text-white">${x.text}</p><p class="text-xs text-gray-400 mt-1">${x.meaning}</p></div>`).join('');
+        document.getElementById('faziletler').innerHTML = (esma.faziletler||[]).map(f=>`<div class="flex items-start gap-3"><span class="text-amber-400 mt-0.5">🏆</span><p class="text-sm text-gray-300">${f}</p></div>`).join('');
+
+        const allDays = ['Pazartesi','Salı','Çarşamba','Perşembe','Cuma','Cumartesi','Pazar'];
+        document.getElementById('luckyDays').innerHTML = allDays.map(d=>{const l=(esma.days||[]).includes(d);return `<div class="glass-card-light rounded-xl p-3 text-center ${l?'border border-amber-500/30':''}"><p class="text-sm ${l?'text-amber-400 font-bold':'text-gray-500'}">${d}</p>${l?'<p class="text-xs text-green-400 mt-1">✓ Hayırlı</p>':''}</div>`;}).join('');
+        document.getElementById('luckyHours').innerHTML = (esma.hours||[]).map(h=>`<div class="glass-card-light rounded-xl p-4 flex items-center justify-between"><div class="flex items-center gap-3"><span class="text-2xl">🕐</span><div><p class="text-sm font-bold text-white">${h}</p><p class="text-xs text-gray-400">Zikir için uygun zaman</p></div></div><span class="info-badge px-3 py-1 rounded-full text-xs">Önerilen</span></div>`).join('');
+
+        const mp = [{name:'Hilal',symbol:'🌒',desc:'Yeni başlangıçlar'},{name:'İlk Dördün',symbol:'🌓',desc:'Karar alma zamanı'},{name:'Dolunay',symbol:'🌕',desc:'Enerji zirvesi'},{name:'Son Dördün',symbol:'🌗',desc:'Arınma zamanı'}];
+        document.getElementById('moonPhases').innerHTML = mp.map(m=>`<div class="glass-card-light rounded-xl p-4 flex items-center gap-4 ${esma.moonPhase===m.name?'border border-amber-500/30':''}"><span class="text-3xl">${m.symbol}</span><div class="flex-1"><p class="text-sm font-bold ${esma.moonPhase===m.name?'text-amber-400':'text-white'}">${m.name} ${esma.moonPhase===m.name?'⭐':''}</p><p class="text-xs text-gray-400">${m.desc}</p></div></div>`).join('');
+
+        const z1=z[0]||{text:esma.name,count:esma.zikirCount}, z2=z[1]||z1;
+        document.getElementById('calendarBody').innerHTML = [
+            {d:'Pazartesi',h:'06:00',z:z1.text,c:z1.count},{d:'Salı',h:'07:00',z:z1.text,c:Math.floor(z1.count/2)},
+            {d:'Çarşamba',h:'05:00',z:z2.text,c:z2.count},{d:'Perşembe',h:'06:00',z:z1.text,c:z1.count},
+            {d:'Cuma',h:'14:00',z:z1.text,c:esma.zikirCount},{d:'Cumartesi',h:'04:00',z:z2.text,c:z2.count},
+            {d:'Pazar',h:'06:00',z:z1.text,c:Math.floor(z1.count/3)}
+        ].map(w=>`<tr class="border-b border-gray-800/50"><td class="py-2 text-sm text-gray-300">${w.d}</td><td class="py-2 text-sm text-amber-400">${w.h}</td><td class="py-2 text-sm font-amiri text-white">${w.z}</td><td class="py-2 text-sm text-gray-400">${w.c}</td></tr>`).join('');
+
+        // Astrology
+        if (userData.wantAstrology && userData.birthHour !== null) {
+            document.getElementById('astrologyTab').style.display = '';
+            populateAstroBasics();
+        } else {
+            document.getElementById('astrologyTab').style.display = 'none';
+        }
+    }
+
+    function populateAstroBasics() {
+        const m=parseInt(userData.birthMonth), d=parseInt(userData.birthDay), h=parseInt(userData.birthHour)||12;
+        const sunIdx = getSunSign(m,d);
+        const risingIdx = (sunIdx + Math.floor(h/2)) % 12;
+        const moonIdx = (m + d + parseInt(userData.birthYear)) % 12;
+
+        document.getElementById('sunSignDisplay').textContent = SYMBOLS[sunIdx];
+        document.getElementById('sunSignName').textContent = SIGNS[sunIdx];
+        document.getElementById('risingSignDisplay').textContent = SYMBOLS[risingIdx];
+        document.getElementById('risingSignName').textContent = SIGNS[risingIdx];
+        document.getElementById('moonSignDisplay').textContent = SYMBOLS[moonIdx];
+        document.getElementById('moonSignName').textContent = SIGNS[moonIdx];
+        const el = ELEMENTS[sunIdx];
+        document.getElementById('elementDisplay').textContent = el==='Ateş'?'🔥':el==='Toprak'?'🌍':el==='Hava'?'💨':'💧';
+        document.getElementById('elementName').textContent = el;
+
+        const planets = ['Güneş','Ay','Merkür','Venüs','Mars','Jüpiter','Satürn','Uranüs'];
+        const symbols = ['☉','☽','☿','♀','♂','♃','♄','♅'];
+        document.getElementById('planetPositions').innerHTML = planets.map((p,i)=>{
+            const si = (sunIdx+i*2+d%5)%12;
+            return `<div class="glass-card-light rounded-xl p-3 text-center"><p class="text-2xl mb-1">${symbols[i]}</p><p class="text-xs text-gray-400">${p}</p><p class="text-xs font-bold text-amber-400">${SIGNS[si]}</p></div>`;
+        }).join('');
+    }
+
+    // ===================================================================
+    // TABS
+    // ===================================================================
+    function switchTab(name) {
+        document.querySelectorAll('.tab-content').forEach(el=>el.classList.add('hidden'));
+        document.getElementById(`tab-${name}`).classList.remove('hidden');
+        document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+        document.querySelector(`[data-tab="${name}"]`).classList.add('active');
+    }
+
+    // ===================================================================
+    // JSON EXPORT
+    // ===================================================================
+    function exportJSON() {
+        const payload = {
+            account_id: `user_${Date.now()}`,
+            platform: "Ruhani Keşif Dashboard",
+            user_data: {
+                name: userData.name, phone: userData.phone, email: userData.email||null,
+                birth_date: `${userData.birthYear}-${String(userData.birthMonth).padStart(2,'0')}-${String(userData.birthDay).padStart(2,'0')}`,
+                birth_time: userData.birthHour!==null?`${String(userData.birthHour).padStart(2,'0')}:${String(userData.birthMinute||0).padStart(2,'0')}`:null,
+                birth_place: userData.birthCity, verified: userData.verified
+            },
+            analysis: {
+                ebced_value: userData.ebcedValue,
+                esma_ul_husna: userData.matchedEsma ? {
+                    order:userData.matchedEsma.order, arabic:userData.matchedEsma.arabic,
+                    name:userData.matchedEsma.name, meaning:userData.matchedEsma.meaning,
+                    element:userData.matchedEsma.element, zikir_count:userData.matchedEsma.zikirCount,
+                    lucky_days:userData.matchedEsma.days, lucky_hours:userData.matchedEsma.hours
+                } : null
+            },
+            palmistry: lastPalmResult ? { analyzed: true, result: lastPalmResult } : { analyzed: false },
+            astrology: lastAstroResult ? { analyzed: true, result: lastAstroResult } : { analyzed: false },
+            scheduled_time: new Date().toISOString()
+        };
+        document.getElementById('jsonOutput').textContent = JSON.stringify(payload, null, 2);
+        document.getElementById('jsonModal').classList.remove('hidden');
+    }
+
+    function closeJSONModal() { document.getElementById('jsonModal').classList.add('hidden'); }
+    function copyJSON() {
+        navigator.clipboard.writeText(document.getElementById('jsonOutput').textContent).then(()=>{
+            const b=event.target; b.textContent='✓ Kopyalandı!'; setTimeout(()=>b.textContent='📋 Panoya Kopyala',2000);
+        });
+    }
+
+    function resetWizard() {
+        userData={}; lastPalmResult=null; lastAstroResult=null; palmImageBase64=null; currentStep=1;
+        document.getElementById('inputName').value=''; document.getElementById('inputPhone').value='';
+        document.getElementById('inputEmail').value=''; document.getElementById('agreeTerms').checked=false;
+        document.getElementById('birthDay').value=''; document.getElementById('birthMonth').value='';
+        document.getElementById('birthYear').value=''; document.getElementById('birthCity').value='';
+        document.getElementById('unknownTime').checked=false;
+        document.getElementById('birthHour').disabled=false; document.getElementById('birthMinute').disabled=false;
+        document.getElementById('wantAstrology').checked=true;
+        document.querySelectorAll('.otp-input').forEach(i=>i.value='');
+        document.getElementById('btnStep1Next').disabled=true;
+        document.getElementById('btnStep2Next').disabled=true;
+        document.getElementById('btnStep3Next').disabled=true;
+        document.getElementById('astrologyResponseContainer').innerHTML='';
+        resetPalmUpload();
+        goToStep(1);
+    }
+
+    document.getElementById('jsonModal').addEventListener('click', e => { if(e.target===document.getElementById('jsonModal')) closeJSONModal(); });
+    </script>
+</body>
+</html>
