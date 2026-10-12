@@ -2,6 +2,8 @@
 
 > **Kaynak (hedef doküman):** https://gist.github.com/different35/2e26066e6a025e3228568ef8648428e8
 > Bu yol haritası, söz konusu strateji/mühendislik raporundaki **BÖLÜM 12 (A'dan Z'ye geliştirme planı)** fazlarını ve rapordaki mimari zorunlulukları doğrudan hedef olarak alır.
+>
+> ⚠️ **Kapsam ve ürünleştirme bu dosyada DEĞİLDİR.** Ürün kalemlerinin izahı (girdi→hesap→kural→çıktı→fiyat), MVP'nin 6 SKU'sunun detaylı tanımı, paketleme ve Definition of Done → **[PRODUCT.md](PRODUCT.md)**. Bu dosya yalnızca **faz sırası ve çıkış ölçütlerini** içerir; PRODUCT.md §5'te çapraz referanslıdır.
 
 ## Ürünün tek cümlelik tanımı (kuzey yıldızı)
 
