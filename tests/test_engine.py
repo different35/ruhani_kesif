@@ -57,21 +57,33 @@ def test_nakshatra_boundaries():
 
 
 def test_dasha_balance_swati():
-    # Swati Rahu lordudur; Ay 19.4667 Libra = Swati span 186.667..200 -> kalan ~0.72 yıl
-    rem, lord = balance_years(199.4667, None)
-    assert lord == "Rahu" and 0.6 < rem < 0.8
+    """GOLDEN: PyJHora `vimsottari_dasha_start_date` kuralı — balance = next_lord_yrs * frac_elapsed.
+    Swati (nak idx 14) lordu Rahu; sıradaki lord Jupiter (16 yıl).
+    Ay 199.4667° -> frac=0.96 -> balance = 15.36 yıl, başlangıç MD = Jupiter.
+    (Eski sürüm `Rahu kalanı 0.72 yıl` üretiyordu — YANLIŞ formüldü, düzeltildi.)"""
+    bal, start_lord, current_lord = balance_years(199.4667)
+    assert current_lord == "Rahu" and start_lord == "Jupiter"
+    assert abs(bal - 15.36) < 0.01
 
 
 def test_dasha_timeline_shape(adapter):
     moon = adapter.longitude("moon", J2000)
     tl = vimshottari(moon, swe.julday(2000, 1, 1, 12.0))
-    assert len(tl) == 81                       # balance ile birleşen ilk MD + 9 tam MD
-    assert tl[0]["mahadasha"] == "Rahu" and tl[0]["antardasha"] != "Rahu"
-    # Rahu-Mercury AD'si doğumda zaten bitmiş -> timeline'a girmemeli
-    assert not any(n["mahadasha"] == "Rahu" and n["antardasha"] == "Mercury" for n in tl)
-    # süre tutarlılığı: AD yılları toplamı ≈ MD yılları
-    rah_md = [n for n in tl if n["mahadasha"] == "Rahu"]
-    assert abs(sum(n["years"] for n in rah_md) - YEARS["Rahu"]) < 0.05
+    # 9 MD döngüsü (PyJHora vimsottari_mahadasa ile birebir), her MD'da kırpılmış
+    # ilk AD dahil en fazla 9 AD -> 81 segment; timeline toplamı ~120 yıla oturur.
+    assert len(tl) <= 81
+    assert tl[0]["mahadasha"] == "Jupiter" and tl[0]["antardasha"] == "Jupiter"
+    jd0 = swe.julday(2000, 1, 1, 12.0)
+    span = (swe.julday(*tl[-1]["end_utc"]) - jd0) / 365.2425
+    assert abs(span - 119.36) < 0.1          # balance(15.36) + 8 tam MD = 119.36 yıl
+    # ardışık segmentler kesintisiz olmalı (boşluk/çakışma yok)
+    for i in range(1, len(tl)):
+        prev_end = swe.julday(*tl[i-1]["end_utc"], 0.5)
+        cur_start = swe.julday(*tl[i]["start_utc"], 0.5)
+        assert abs(prev_end - cur_start) < 1.0, f"gap at {i}"
+    # süre tutarlılığı: tam MD'larda AD yılları toplamı ≈ MD yılı
+    sat_md = [n for n in tl if n["mahadasha"] == "Saturn"]
+    assert abs(sum(n["years"] for n in sat_md) - YEARS["Saturn"]) < 0.05
 
 
 def test_events_ingress_reference(adapter):
