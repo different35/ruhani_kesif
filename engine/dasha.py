@@ -50,16 +50,23 @@ def vimshottari(moon_sidereal_lon: float, birth_jd_ut: float) -> list[dict]:
     seq = [LORDS[(lord_i + k) % 9] for k in range(10)]
     durations = [rem_years] + [YEARS[s] for s in seq[1:]]
     cursor = birth_jd_ut
-    for lord, yrs in zip(seq, durations):
+    prev_lord = seq[-1]  # balance kesintisi: başlangıç MD'ının ilk AD'sı kırpılır
+    for i_md, (lord, yrs) in enumerate(zip(seq, durations)):
         start, end = cursor, cursor + yrs * 365.2425
         sub_seq = ANTARDASHA_ORDER[lord]
         sub_cursor = start
-        for sub in sub_seq:
+        for si, sub in enumerate(sub_seq):
             sub_yrs = yrs * YEARS[sub] / 120.0
-            md_list.append({"mahadasha": lord, "antardasha": sub,
-                            "start_utc": swe.revjul(sub_cursor, 1)[:3],
-                            "end_utc": swe.revjul(min(sub_cursor + sub_yrs*365.2425, end), 1)[:3],
-                            "years": round(sub_yrs, 3)})
-            sub_cursor += sub_yrs * 365.2425
+            if si == 0 and i_md == 0:
+                full_sub = YEARS[lord] * YEARS[sub] / 120.0
+                skipped = full_sub - sub_yrs      # doğumdan önce tüketilen AD parçası
+                sub_cursor += skipped * 365.2425
+            seg_end = min(sub_cursor + sub_yrs * 365.2425, end)
+            if seg_end > sub_cursor:
+                md_list.append({"mahadasha": lord, "antardasha": sub,
+                                "start_utc": swe.revjul(sub_cursor, 1)[:3],
+                                "end_utc": swe.revjul(seg_end, 1)[:3],
+                                "years": round((seg_end - sub_cursor) / 365.2425, 3)})
+            sub_cursor = seg_end
         cursor = end
     return md_list

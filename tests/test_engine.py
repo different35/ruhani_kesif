@@ -65,8 +65,10 @@ def test_dasha_balance_swati():
 def test_dasha_timeline_shape(adapter):
     moon = adapter.longitude("moon", J2000)
     tl = vimshottari(moon, swe.julday(2000, 1, 1, 12.0))
-    assert len(tl) == 90                       # 10 MD x 9 AD (balance + tam 120 yil döngüsü)
-    assert tl[0]["mahadasha"] == tl[0]["antardasha"] == "Rahu"
+    assert len(tl) == 81                       # balance ile birleşen ilk MD + 9 tam MD
+    assert tl[0]["mahadasha"] == "Rahu" and tl[0]["antardasha"] != "Rahu"
+    # Rahu-Mercury AD'si doğumda zaten bitmiş -> timeline'a girmemeli
+    assert not any(n["mahadasha"] == "Rahu" and n["antardasha"] == "Mercury" for n in tl)
     # süre tutarlılığı: AD yılları toplamı ≈ MD yılları
     rah_md = [n for n in tl if n["mahadasha"] == "Rahu"]
     assert abs(sum(n["years"] for n in rah_md) - YEARS["Rahu"]) < 0.05
