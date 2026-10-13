@@ -118,20 +118,46 @@ def _load_ephem(path: str):
     return eph, bodies, jd_range
 
 
-def _lahiri_ayanamsa_deg(jd_ut: float) -> float:
-    """Lahiri ayanamsa — CANLI KALİBRASYON (P1-8, bu oturumda yeniden fit edildi):
-    swisseph SIDM_LAHIRI 1800–2200 aralığında JD örneklemeyle kuadratik modele
-    least-squares fit verildi (max hata < 1e-7°, yani fit sayısal olarak tam).
-    Önceki taslaktaki `24.7403` sabiti Fagan/Bradley değeriydi (yanlış referans
-    noktası) ve J2000'de +0.88° sapma üretiyordu → kalibre katsayılarla düzeltildi.
-    Referans testi: tests/test_skyfield.py::test_ayanamsa_calibrated_against_swiss."""
+# Ayanamsa kuadratik modelleri: a + b·t + c·t² (t = Julian century TT, J2000'den).
+# CANLI KALİBRASYON (P1-8; bu oturumda Raman/KP/FB genişletildi): her mod için
+# swisseph get_ayanamsa_ut 1970–2200 aralığında 400 noktada örneklenip kuadratik
+# modele least-squares fit verildi; max mutlak hata her modda < 6e-9° (sayısal
+# olarak birebir). Önceki taslaktaki `24.7403` sabiti Fagan/Bradley değeriydi
+# (yanlış referans noktası) ve J2000'de +0.88° sapma üretiyordu → düzeltildi.
+# NOT (lisans temizliği maddesi): katsayılar Swiss ÇIKTISINA fit edilmiş olgusal
+# sayılardır; bağımsız kaynakla doğrulama P1-10 golden set işidir. Fit script'i:
+# ROADMAP "Ajan 2" tanımı; referans testleri: tests/test_skyfield.py.
+_AYANAMSA_MODES: dict[str, tuple[float, float, float]] = {
+    "lahiri":         (23.85709235, 1.39688796, 0.00030709),
+    "raman":          (22.41079104, 1.39688808, 0.00030706),
+    "kp":             (23.76024004, 1.39688808, 0.00030706),
+    "fagan_bradley":  (24.74029999, 1.39688797, 0.00030709),
+}
+
+
+def _ayanamsa_deg(mode: str, jd_ut: float) -> float:
+    try:
+        a, b, c = _AYANAMSA_MODES[mode]
+    except KeyError:
+        raise ValueError(
+            f"bilinmeyen ayanamsa modu: {mode!r}; desteklenenler: "
+            f"{sorted(_AYANAMSA_MODES)}") from None
     t = (jd_ut - 2451545.0) / 36525.0
-    return 23.85709236 + 1.39688796 * t + 0.00030708 * t * t
+    return a + b * t + c * t * t
+
+
+def _lahiri_ayanamsa_deg(jd_ut: float) -> float:
+    return _ayanamsa_deg("lahiri", jd_ut)
 
 
 class SkyfieldAdapter(EphemerisPort):
-    """MIT-licenced yedek hesaplayıcı. frame='sidereal' → trop − Lahiri ayanamsa
+    """MIT-licenced yedek hesaplayıcı. frame='sidereal' → trop − ayanamsa
     (TEK DOĞRU KAYNAK kuralı, swiss_adapter ile aynı sözleşme).
+
+    Ayanamsa modları: lahiri (varsayılan), raman, kp, fagan_bradley — hepsi
+    kuadratik kalibrasyonlu (bkz. _AYANAMSA_MODES); longitude()/houses()
+    daima self._mode değerini kullanır, olay bazlı mod geçişi yoktur
+    (global durum yok ⇒ thread-safe hesaplama).
 
     Singleton: `SkyfieldAdapter.get()` — kernel yüklemesi (~30 MB) tek sefer;
     doğrudan `SkyfieldAdapter()` da çalışır (test/geriye uyum)."""
@@ -142,10 +168,11 @@ class SkyfieldAdapter(EphemerisPort):
     def __init__(self, ayanamsa_mode: str = "lahiri"):
         if not _SKYFIELD_OK:
             raise ImportError("skyfield kurulu değil: pip install skyfield")
-        if ayanamsa_mode != "lahiri":
-            raise NotImplementedError(
-                f"Skyfield yedeği yalnızca 'lahiri' destekler (mode={ayanamsa_mode!r}); "
-                "diğer ayanamsalar için referans: SwissEphemerisAdapter")
+        if ayanamsa_mode not in _AYANAMSA_MODES:
+            raise ValueError(
+                f"bilinmeyen ayanamsa modu: {ayanamsa_mode!r}; desteklenenler: "
+                f"{sorted(_AYANAMSA_MODES)}")
+        self._mode_name = ayanamsa_mode
         self._ts = load.timescale()
         # de440s: küçük boyutlu, görsel hassasiyet için yeterli (public-domain JPL veri)
         self._eph, self._bodies, self._jd_range = _load_ephem("de440s.bsp")
@@ -270,7 +297,7 @@ class SkyfieldAdapter(EphemerisPort):
         else:
             lon = self._geo_true_lon(body, time)   # hız hesabı YOK (performans)
         if frame == "sidereal":
-            lon = (lon - _lahiri_ayanamsa_deg(self._jd_ut(time))) % 360.0
+            lon = (lon - _ayanamsa_deg(self._mode_name, self._jd_ut(time))) % 360.0
         return lon
 
     def velocity(self, body: str, date) -> float:
@@ -283,11 +310,12 @@ class SkyfieldAdapter(EphemerisPort):
             raise ValueError(f"bilinmeyen gök cismi: {body!r}")
         return self.velocity(body, date) < 0
 
-    def ayanamsa(self, date, mode: str = "lahiri") -> float:
-        if mode != "lahiri":
-            raise NotImplementedError(
-                f"ayanamsa modu {mode!r} yedekte yok (yalnızca 'lahiri', P1-8 kapsamı)")
-        return _lahiri_ayanamsa_deg(self._jd_ut(self._time(date)))
+    def ayanamsa(self, date, mode: str | None = None) -> float:
+        """Ayanamsa (derece). mode=None → nesnenin modu (tutarlılık ilkesi:
+        varsayılan asla nesneden bağımsız 'lahiri' değildir; swiss denetim
+        bulgusu P1-2'nin skyfield portundaki karşılığı)."""
+        m = self._mode_name if mode is None else mode
+        return _ayanamsa_deg(m, self._jd_ut(self._time(date)))
 
     def houses(self, date, location: Location, system: str = "placidus") -> list[float]:
         """Ev cuspleri (sidereal). P1-8 kapanış kararı (canlı doğrulamalı):

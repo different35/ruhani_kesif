@@ -87,9 +87,16 @@ def test_dasha_timeline_shape(adapter):
 
 
 def test_events_ingress_reference(adapter):
-    """Canlı çıkarılan referans: Lahiri sid. Güneş 2026-03-14 Kumbha->Meena."""
+    """Canlı çıkarılan referans: Lahiri sid. Güneş 2026-03-14 Kumbha->Meena.
+
+    Pencere 2026-03-01..2026-04-15: ikinci gerçek geçiş (Meena->Mesha,
+    2026-04-14) algoritma düzeltmesinden SONRA bulunuyor (eski sürümde
+    kaçardı) — beklenti 1'den 2'ye güncellendi; her iki olay da doğrulanır.
+    """
     evs = adapter.events((dt.datetime(2026, 3, 1, tzinfo=UTC),
                           dt.datetime(2026, 4, 15, tzinfo=UTC)), "sun")
-    assert len(evs) == 1
+    assert len(evs) == 2
     assert evs[0]["from_sign"] == "Aquarius" and evs[0]["to_sign"] == "Pisces"
     assert evs[0]["ut"].startswith("2026-03-14")
+    assert evs[1]["from_sign"] == "Pisces" and evs[1]["to_sign"] == "Aries"
+    assert evs[1]["ut"].startswith("2026-04-14")
