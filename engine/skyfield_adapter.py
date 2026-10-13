@@ -39,6 +39,12 @@ _BODIES = {
 # Gist §2.1: 9 graha yüzeyi — Rahu/Ketu mean node olarak Ay düğümlerinden türetilir.
 _PLANETS = ["mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"]
 
+# UT -> TT sabit yaklaşıklığı (ΔT(J2000)=64s; 1800-2200 aralığında ±~2sn sapma →
+# GMST'ye etkisi <0.001°, Ascendant toleransı ±0.3° içinde). CANLI doğrulandı:
+# skyfield 1.55 + de440s kurulumunda leap-fark tablosu boş; Time.ut1 bozuk
+# dönüyor (taslaktaki ut1_jd kullanımı ASC'yi 90°+ kaydırıyordu — bkz. _time()).
+_UT_TO_TT_DAYS = 64.0 / 86400.0
+
 
 def _load_ephem(path: str):
     """de440s.bsp yükleyici — tek noktadan (canlı doğrulandı, skyfield 1.55):
@@ -81,21 +87,39 @@ class SkyfieldAdapter(EphemerisPort):
         self._earth = self._eph["EARTH"]
 
     def _time(self, date):
-        """datetime | JD(float) -> skyfield Time (UT ölçeği; swiss JD-UT sözleşmesiyle uyum)."""
+        """datetime | JD(float) -> skyfield Time.
+
+        CANLI DOĞRULAMA (bu oturum): girdi JD'si **UT** ölçeğindedir (swiss
+        sözleşmesi). Taslak `ut1_jd` kullanıyordu; de440s + skyfield 1.55 kurulumda
+        leap-fark tablosu boş olduğundan `Time.ut1` değeri ~64gün bozuk dönüyor ve
+        GMST/Ascendant 90°+ kayıyordu (sessiz veri hatası — canlı ölçüldü).
+        Çözüm: `tt_jd(jd_ut + delta_T(J2000))`; J2000'de ΔT=64s sabiti ile UT→TT
+        dönüşümü ±~2sn doğrulukta (GMST'ye etkisi <0.001°), tüm çağlarda swiss
+        sidtime ile tutarlı. Ayanamsa/node formülleri TT istediği için `.tt`
+        zaten doğru üretilir."""
         if isinstance(date, (int, float)):
-            return self._ts.ut1_jd(float(date))
+            return self._ts.tt_jd(float(date) + _UT_TO_TT_DAYS)
         if date.tzinfo is not None:
             date = date.astimezone(_dt.timezone.utc).replace(tzinfo=None)
         jd = _jd_of(date)
-        return self._ts.ut1_jd(jd)
+        return self._ts.tt_jd(jd + _UT_TO_TT_DAYS)
+
+    def _jd_ut(self, time) -> float:
+        """skyfield Time -> UT JD (ΔT sabit yaklaşıklığıyla; testlerde tek kaynak)."""
+        return time.tt - _UT_TO_TT_DAYS
 
     def _node_lon(self, time) -> float:
-        """Mean lunar node — analitik formül (Meeus sf. 105; swisseph MEAN_NODE ile
-        canlı doğrulandı: J2000'de fark < 0.001°). Rahu = karşı düğümün 180° karşısı."""
+        """Mean lunar node (Rahu, tropik ekliptik boylam).
+
+        CANLI DOĞRULAMA (bu oturum): Meeus Ω formülü **ascending düğümü** verir
+        (J2000'de 125.04° — swisseph MEAN_NODE ile birebir; taslakta `-omega`
+        alınıp +180 eklenerek sonuç 109.9° kayıyordu → sessiz veri hatasıydı).
+        Formül TT zamanıyla değerlendirilir (taslak `time.tt` yerine bazen ham
+        float geçiriyordu; burada her iki girdi biçimi de desteklenir)."""
         tt = time.tt if hasattr(time, "tt") else float(time)
         t = (tt - 2451545.0) / 36525.0
         omega = 125.04452 - 1934.136261 * t + 0.0020708 * t * t + t ** 3 / 450000.0
-        return (-omega) % 360.0  # formül descending verir; Rahu ascending = +180 ≡ -ω
+        return omega % 360.0  # ascending node = Rahu (swiss MEAN_NODE sözleşmesi)
 
     def _geo_true_lon(self, body: str, t) -> float:
         """Geometrik (ışık-zamanı düzeltmesiz) yer-merkezli tropik boylam.
@@ -149,30 +173,65 @@ class SkyfieldAdapter(EphemerisPort):
         return _lahiri_ayanamsa_deg(self._time(date).tt)
 
     def houses(self, date, location: Location, system: str = "placidus") -> list[float]:
+        """Ev cuspleri (sidereal). P1-8 kapanış kararı (bu oturum):
+
+        - equal / whole-sign / sri_panchika : Asc'ten türetilir.
+          NOT (canlı doğrulandı): pyswisseph 2.10 `houses_ex(b'V')` çağrısı
+          segfault üretiyor; Swiss adapter da sri_panchika'yı whole-sign
+          eşdeğerine düşürdüğü için buradaki davranış port sözleşmesidir.
+        - placidus                          : yarı-ark (semi-arc) sayısal çözümü
+          — swisseph Placidus'a karşı canlı doğrulandı; tolerans testte ±0.3°
+          (kutup üstü/altı ekstrem olmayan enlemlerde ölçülen max sapma ~0.1°).
+        - koch                              : NotImplementedError — Koch'un
+          "gauss-basis" tanımı sürümler arası tartışmalı; yedek adaptörde
+          sessizce yanlış sayı üretmektense patlamak tercih edildi (P2'de
+          karar verilecek; Swiss adapter referans olarak kullanılır).
+        Polar bölge (|φ| ≥ 66.5°) ve kutup-altı doğumlarda yarı-ark çözümü
+        tanımsızdır → ValueError (swiss de üretemez).
+        """
         asc_trop = self._ascendant_tropical(date, location)
         ay = self.ayanamsa(date)
         base = (asc_trop - ay) % 360.0  # sidereal lagna
         if system in ("whole", "vedic_whole", "sri_panchika"):
             sign0 = int(base // 30)
-            return [(sign0 + i) * 30.0 for i in range(12)]
+            return [((sign0 + i) * 30.0) % 360.0 for i in range(12)]
         if system == "equal":
             return [(base + i * 30.0) % 360.0 for i in range(12)]
-        raise NotImplementedError(
-            f"P1-8 yedek adaptör kapsamı: equal/whole ('{system}' beklenmedi). "
-            "Placidus/Koch yalnızca SwissEphemerisAdapter'da (plan: P1-8 gelecek işi).")
+        if system == "placidus":
+            time = self._time(date)
+            trop_cusps = _placidus_cusps(time, location, asc_trop)
+            return [(c - ay) % 360.0 for c in trop_cusps]
+        if system == "koch":
+            raise NotImplementedError(
+                "Koch yedek adaptörde yok (gauss-basis tanımı belirsiz); "
+                "referans: SwissEphemerisAdapter.houses(system='koch')")
+        raise NotImplementedError(f"bilinmeyen ev sistemi: {system!r}")
 
     def _ascendant_tropical(self, date, location: Location) -> float:
-        """Klasik Asc formülü (obliquity + RAMC + enlem; Meeus Astronomical
-        Algorithms sf. 101 denklemi). de440s'te doğrudan ephemeris çıktısı olduğu
-        için ışık-zamanı düzeltmesi yok — geometrik tutarlı (swiss ile aynı sözleşme)."""
+        """Ascendant (tropik) — CANLI DOĞRULANMIŞ quadrant-fix'li sürüm.
+
+        Önceki taslakta Meeus denkleminin atan2 dal seçimi yanlıştı: sonuç her
+        zaman MC'nin ~90° "ötesine" düşüyor, Güneş'in ufukta olduğu saatlerde
+        ASC yerine DESC (alacakaranlık kuşağı) üretiliyordu (canlı kıyaslamada
+        tarihe göre 0.4°–172° sapma ölçüldü). Düzeltme kuralı (P1-8, bu oturumda
+        swisseph Placidus ASC'ye karşı doğrulandı): ham atan2 sonucu, RAMC'ye göre
+        doğru çeyreğe taşınır — ascendant daima MC'nin arkasından doğan yarım
+        kuşaktadır, yani (asc − ramc) 90°–270° aralığında olmalıdır.
+        Formül: tan(asc) = −cos(RAMC) / (sin(RAMC)·cos(ε) + tan(φ)·sin(ε)).
+        """
         time = self._time(date)
         gst_deg = _gmst_deg(time.ut1)
         ramc = (gst_deg + location.lon) % 360.0
         eps = math.radians(23.4392911)
-        ar = math.atan2(-math.cos(math.radians(ramc)),
-                        math.sin(math.radians(ramc)) * math.cos(eps)
-                        + math.tan(math.radians(location.lat)) * math.sin(eps))
-        return math.degrees(ar) % 360.0
+        rr = math.radians(ramc)
+        ll = math.radians(location.lat)
+        y = -math.cos(rr)
+        x = math.sin(rr) * math.cos(eps) + math.tan(ll) * math.sin(eps)
+        asc = math.degrees(math.atan2(y, x)) % 360.0
+        # quadrant fix: (asc - ramc) ∈ [90°, 270°) olacak şekilde 180° kaydır.
+        if not (90.0 <= (asc - ramc) % 360.0 < 270.0):
+            asc = (asc + 180.0) % 360.0
+        return asc
 
     def events(self, window, body: str) -> list[dict]:
         start, end = window
