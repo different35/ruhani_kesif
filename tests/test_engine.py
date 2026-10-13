@@ -11,7 +11,7 @@ import swisseph as swe
 from engine.swiss_adapter import SwissEphemerisAdapter
 from engine.ephemeris_port import Location
 from engine.nakshatra import nakshatra_pada, NAKSHATRAS
-from engine.dasha import vimshottari, balance_years, YEARS
+from engine.dasha import vimshottari, balance_years, YEARS, YEAR
 
 UTC = dt.timezone.utc
 J2000 = dt.datetime(2000, 1, 1, 12, tzinfo=UTC)
@@ -56,34 +56,86 @@ def test_nakshatra_boundaries():
     assert (np_["nakshatra"], np_["pada"]) == ("Swati", 4)
 
 
-def test_dasha_balance_swati():
-    """GOLDEN: PyJHora `vimsottari_dasha_start_date` kuralı — balance = next_lord_yrs * frac_elapsed.
-    Swati (nak idx 14) lordu Rahu; sıradaki lord Jupiter (16 yıl).
-    Ay 199.4667° -> frac=0.96 -> balance = 15.36 yıl, başlangıç MD = Jupiter.
-    (Eski sürüm `Rahu kalanı 0.72 yıl` üretiyordu — YANLIŞ formüldü, düzeltildi.)"""
+def test_dasha_balance_golden():
+    """GOLDEN: standart Vimshottari + PyJHora `vimsottari_dasha_start_date`.
+
+    Doğum dasha'sı = Ay'ın İÇİNDE OLDUĞU nakshatra lordu;
+    balance = YEARS[current_lord] * (1 - frac_elapsed).
+      Ay 190° (Swati, Rahu lordu, frac 0.25) -> (13.5, "Rahu", "Rahu")  [18×0.75]
+      Ay 0°   (Ashwini, Ketu lordu, frac 0)   -> (7.0,  "Ketu", "Ketu") [7×1.0]
+    (Geçici bir sürüm `next_lord * frac_elapsed` kullanmıştı — hiçbir kaynakta
+    yoktur ve bu testi çökertirdi.)"""
+    bal, start_lord, current_lord = balance_years(190.0)
+    assert (round(bal, 6), start_lord, current_lord) == (13.5, "Rahu", "Rahu")
+    bal, start_lord, current_lord = balance_years(0.0)
+    assert (round(bal, 6), start_lord, current_lord) == (7.0, "Ketu", "Ketu")
+
+
+def test_dasha_balance_swati_j2000_moon():
+    """Canlı J2000 Ay'ı (sid. 199.4667°, Swati pada 4): Rahu'nun son ~0.72 yılı.
+    PyJHora referansı: MD başlangıcı doğumdan geriye hesaplanır ->
+    balance = 18 × (1 - 0.96) ≈ 0.72 yıl, devam eden MD = Rahu."""
     bal, start_lord, current_lord = balance_years(199.4667)
-    assert current_lord == "Rahu" and start_lord == "Jupiter"
-    assert abs(bal - 15.36) < 0.01
+    assert current_lord == "Rahu" and start_lord == "Rahu"
+    assert abs(bal - 0.72) < 0.01
 
 
 def test_dasha_timeline_shape(adapter):
-    moon = adapter.longitude("moon", J2000)
-    tl = vimshottari(moon, swe.julday(2000, 1, 1, 12.0))
-    # 9 MD döngüsü (PyJHora vimsottari_mahadasa ile birebir), her MD'da kırpılmış
-    # ilk AD dahil en fazla 9 AD -> 81 segment; timeline toplamı ~120 yıla oturur.
-    assert len(tl) <= 81
-    assert tl[0]["mahadasha"] == "Jupiter" and tl[0]["antardasha"] == "Jupiter"
+    moon = adapter.longitude("moon", J2000)   # sid. ~199.4667° -> Rahu kalanı ~0.72 yıl
     jd0 = swe.julday(2000, 1, 1, 12.0)
-    span = (swe.julday(*tl[-1]["end_utc"]) - jd0) / 365.2425
-    assert abs(span - 119.36) < 0.1          # balance(15.36) + 8 tam MD = 119.36 yıl
-    # ardışık segmentler kesintisiz olmalı (boşluk/çakışma yok)
+    tl = vimshottari(moon, jd0)
+    # İlk MD kırpılmış; doğumdan önce tüketilen AD'ler yayınlanmaz -> < 81 segment.
+    assert len(tl) <= 81
+    bal, start_lord, _cur = balance_years(moon)
+    assert start_lord == "Rahu" and abs(bal - 0.72) < 0.01
+    # Tüketilen ~17.28 yıl Rahu'nun ilk AD'lerini yutar (Ketu..Moon); doğumda
+    # görünür ilk parça Mars AD'sinin kalanı (nominal başlangıcı 1.62 yıl önce)
+    # ve MD sonuna kırpılmış hali ~0.72 yıl (= balance) sürer.
+    assert tl[0]["mahadasha"] == "Rahu" and tl[0]["antardasha"] == "Mars"
+    assert tl[0]["start_utc"][:3] == (2000, 1, 1)          # görünür başlangıç = doğum
+    assert abs(tl[0]["years"] - 0.72) < 0.01               # kalan = balance (kırpık)
+    assert tl[1]["mahadasha"] == "Jupiter" and tl[1]["antardasha"] == "Jupiter"
+    span = (swe.julday(*tl[-1]["end_utc"]) - jd0) / YEAR
+    # Timeline = balance + 8 tam MD = 120 − tüketilen kısım (~102.72 yıl; 120 DEĞİL — normal).
+    assert abs(span - (bal + 102.0)) < 0.01
+    # ardışık segmentler kesintisiz olmalı (boşluk/çakışma yok; saat hassasiyetiyle)
     for i in range(1, len(tl)):
-        prev_end = swe.julday(*tl[i-1]["end_utc"], 0.5)
-        cur_start = swe.julday(*tl[i]["start_utc"], 0.5)
-        assert abs(prev_end - cur_start) < 1.0, f"gap at {i}"
+        prev_end = swe.julday(*tl[i-1]["end_utc"])
+        cur_start = swe.julday(*tl[i]["start_utc"])
+        assert abs(prev_end - cur_start) < 1e-6, f"gap at {i}"
     # süre tutarlılığı: tam MD'larda AD yılları toplamı ≈ MD yılı
     sat_md = [n for n in tl if n["mahadasha"] == "Saturn"]
     assert abs(sum(n["years"] for n in sat_md) - YEARS["Saturn"]) < 0.05
+    # AD süresi balancadan BAĞIMSIZ: Rahu-Jupiter AD'si her zaman 18×16/120 = 2.4 yıl
+    # (eski hatalı kod bunu ~0.1 yıl üretirdi); 2. Rahu MD turunda tam görünür.
+    rj = [n for n in tl if n["mahadasha"] == "Rahu" and n["antardasha"] == "Jupiter"]
+    assert len(rj) == 1 and abs(rj[0]["years"] - 2.4) < 0.005
+    # Rahu MD turunda yalnızca son AD (Mars) görünür; sonraki 9 MD'da Rahu AD'leri TAM döner.
+    ra_total = [n for n in tl if n["mahadasha"] == "Rahu"]
+    assert len(ra_total) == 1                                   # ilk tur kırpık (yalnız Rahu-Mars)
+    rme = [n for n in tl if n["mahadasha"] != "Rahu"]            # yerinde kontrol yerine:
+    rk = [n for n in tl if n["antardasha"] == "Mercury" and n["mahadasha"] == "Ketu"]
+    assert rk and abs(rk[0]["years"] - 7 * 17 / 120) < 0.005     # Ketu-Mercury tam AD = 0.9917 yıl
+
+
+def test_dasha_timeline_golden_190():
+    """GOLDEN takvim: Ay 190° (Swati, frac 0.25) -> Rahu MD kalanı 13.5 yıl.
+    Tüketilen 4.5 yıl = Rahu-Rahu AD (tam 2.7) + Rahu-Jupiter AD'nin ilk 1.8
+    yılı; bunlar doğumdan ÖNCE kaldığı için yayınlanmaz. İlk görünür AD =
+    Rahu-Jupiter: nominal başlangıcı doğumdan ÖNCEYE kayar, görünür süresi =
+    2.4 − 1.8 = 0.6 yıl. Sonraki AD'ler TAM süresiyle döner."""
+    jd0 = swe.julday(2000, 1, 1, 12.0)
+    tl = vimshottari(190.0, jd0)
+    assert tl[0]["mahadasha"] == "Rahu" and tl[0]["antardasha"] == "Jupiter"
+    assert tl[0]["start_utc"][:3] == (2000, 1, 1)     # görünür başlangıç = doğum
+    assert abs(tl[0]["years"] - 0.6) < 0.005          # Jupiter AD'nin kalanı (2.4−1.8)
+    assert abs(tl[1]["years"] - 2.85) < 0.005         # Rahu-Saturn: TAM AD (18×19/120)
+    assert abs(tl[2]["years"] - 2.55) < 0.005         # Rahu-Mercury: TAM AD (18×17/120)
+    # timeline = 13.5 + 8 tam MD = 115.5 yıl (120 − 4.5 tüketilen)
+    span = (swe.julday(*tl[-1]["end_utc"]) - jd0) / YEAR
+    assert abs(span - 115.5) < 0.01
+    for i in range(1, len(tl)):
+        assert abs(swe.julday(*tl[i-1]["end_utc"]) - swe.julday(*tl[i]["start_utc"])) < 1e-6
 
 
 def test_events_ingress_reference(adapter):
