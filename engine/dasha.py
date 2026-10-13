@@ -83,6 +83,51 @@ def balance_years(moon_sidereal_lon: float, smooth: bool = False):
     return balance, current_lord, current_lord
 
 
+    def _build_segment(self, lord: str, sub: str, seg_start: float,
+                       seg_end: float) -> dict:
+        """Tek AD segmenti — TEK KAYNAK.
+
+        `years` = GERÇEK görünür süre (end−start), nominal değil: doğumda
+        kesilen ilk AD'de bu değer kırpık kalandır (ör. 2.7 − 1.95 = 0.75).
+        facts.dasha_tree'in `years` alanı ise sözleşme gereği TAM nominal yıldır;
+        segment süresi her iki yapıta da end−start farkından türetilebilir.
+        """
+        return {"mahadasha": lord, "antardasha": sub,
+                "start_utc": swe.revjul(seg_start, 1),
+                "end_utc": swe.revjul(seg_end, 1),
+                "years": round((seg_end - seg_start) / YEAR, 3)}
+
+    def antardashas_of_md(self, moon_sidereal_lon: float, birth_jd_ut: float,
+                          md_index: int = 0, smooth: bool = False) -> list[dict]:
+        """Bir MD'ın TÜM AD'lerini takvimle döndürür (golden PyJHora testi için).
+
+        Sanal başlangıç kuralı `vimshottari` ile birebir aynıdır (tek kaynak:
+        `_build_segment` + consumed-shift). md_index=0 → balanca ile açılan ilk
+        MD; tüketilen AD'ler burada da yayınlanmaz, doğumda kesilen AD başlangıcı
+        doğumda olarak görünür.
+        """
+        rem_years, start_lord, _c = balance_years(moon_sidereal_lon, smooth)
+        lord_i = LORDS.index(start_lord)
+        seq = [LORDS[(lord_i + k) % 9] for k in range(9)]
+        lord = seq[md_index]
+        if md_index == 0:
+            start = birth_jd_ut
+            consumed_days = (YEARS[lord] - rem_years) * YEAR
+        else:
+            start = birth_jd_ut + rem_years * YEAR \
+                + sum(YEARS[s] for s in seq[1:md_index]) * YEAR
+            consumed_days = 0.0
+        out = []
+        cursor = start - consumed_days          # SANAL başlangıç (doğumdan ÖNCE)
+        for sub in ANTARDASHA_ORDER[lord]:
+            sub_full_days = YEARS[lord] * YEARS[sub] / 120.0 * YEAR
+            seg_start, seg_end = max(cursor, start), cursor + sub_full_days
+            if seg_end > seg_start:
+                out.append(self._build_segment(lord, sub, seg_start, seg_end))
+            cursor = seg_end
+        return out
+
+
 def vimshottari(moon_sidereal_lon: float, birth_jd_ut: float,
                 smooth: bool = False) -> list[dict]:
     """Doğumdan itibaren MD+AD takvimi (julian day UT cinsinden).
@@ -111,9 +156,9 @@ def vimshottari(moon_sidereal_lon: float, birth_jd_ut: float,
         # ulaşan ilk AD kısmen tüketilmiş olabilir ve segmenti doğumda kesilir.
         consumed_days = (YEARS[lord] - yrs) * YEAR if i_md == 0 else 0.0
         sub_cursor = start - consumed_days     # SANAL başlangıç (doğumdan ÖNCE)
-        for si, sub in enumerate(sub_seq):
+        for sub in sub_seq:
             sub_full_days = YEARS[lord] * YEARS[sub] / 120.0 * YEAR  # balancadan bağımsız
-            seg_start = max(sub_cursor, start)   # doğumdan önceki kısak görünmez
+            seg_start = max(sub_cursor, start)   # doğumdan önceki kısım görünmez
             seg_end = sub_cursor + sub_full_days
             if seg_end > seg_start:
                 md_list.append({"mahadasha": lord, "antardasha": sub,
