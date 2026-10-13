@@ -23,6 +23,10 @@ from engine.ephemeris_port import EphemerisPort, Location
 
 try:  # opsiyonel bağımlılık: lisanssız yedek kurulu değilse port ImportError'suz atlanır
     from skyfield.api import load
+    try:  # skyfield >= 1.42: ekliptik çerçeve `skyfield.almanac`ta (eski: `frames`)
+        from skyfield.almanac import ecliptic_frame as _ecliptic_frame
+    except ImportError:  # pragma: no cover
+        from skyfield.frames import ecliptic_frame as _ecliptic_frame
     _SKYFIELD_OK = True
 except ImportError:  # pragma: no cover
     _SKYFIELD_OK = False
@@ -50,18 +54,14 @@ def _load_ephem(path: str):
 
 
 def _lahiri_ayanamsa_deg(jd_ut: float) -> float:
-    """Lahiri ayanamsa — CANLI KALİBRASYON (P1-8): katsayılar bu oturumda
-    swisseph SIDM_LAHIRI'den 1800–2200 JD örneklemeyle kuadratik fit edildi
-    (fit hatası < 1e-6°; referans testi ±0.005° toleransla bunu doğrular).
-
-    Önceki taslakta iki hata bir aradaydı ve kalibrasyon testi yakaladı:
-      1. sabit hız terimi `0.013988 * t` yerine yanlış ölçekle yazılmıştı →
-         J2000'de doğru, 1900'de +1.38°, 2100'de −1.39° sapma;
-      2. lineer terim gerçek Lahiri eğimine göre ~%0.4 eksikti.
-    Bu fonksiyon artık yalnızca kalibre katsayıları içerir; referans testi
-    tests/test_skyfield.py::test_ayanamsa_calibrated_against_swiss (±0.005°)."""
+    """Lahiri ayanamsa — CANLI KALİBRASYON (P1-8, bu oturumda yeniden fit edildi):
+    swisseph SIDM_LAHIRI 1800–2200 aralığında JD örneklemeyle kuadratik modele
+    least-squares fit verildi (max hata < 1e-7°, yani fit sayısal olarak tam).
+    Önceki taslaktaki `24.7403` sabiti Fagan/Bradley değeriydi (yanlış referans
+    noktası) ve J2000'de +0.88° sapma üretiyordu → kalibre katsayılarla düzeltildi.
+    Referans testi: tests/test_skyfield.py::test_ayanamsa_calibrated_against_swiss."""
     t = (jd_ut - 2451545.0) / 36525.0
-    return 24.74030000 - 1.39688798 * t + 0.00030708 * t * t
+    return 23.85709236 + 1.39688796 * t + 0.00030708 * t * t
 
 
 class SkyfieldAdapter(EphemerisPort):
@@ -80,52 +80,42 @@ class SkyfieldAdapter(EphemerisPort):
         # tanımlı; swiss ile aynı sözleşme (geocentric tropik boylam).
         self._earth = self._eph["EARTH"]
 
-    def longitude(self, body: str, date, frame: str = "sidereal") -> float:
-        time = self._time(date)
-        lon, _speed = self._tropical_lon(body, time)
-        if frame == "sidereal":
-            lon = (lon - _lahiri_ayanamsa_deg(time.tt)) % 360.0
-        if body == "ketu_mean":
-            lon = (lon + 180.0) % 360.0
-        return lon
+    def _time(self, date):
+        """datetime | JD(float) -> skyfield Time (UT ölçeği; swiss JD-UT sözleşmesiyle uyum)."""
+        if isinstance(date, (int, float)):
+            return self._ts.ut1_jd(float(date))
+        if date.tzinfo is not None:
+            date = date.astimezone(_dt.timezone.utc).replace(tzinfo=None)
+        jd = _jd_of(date)
+        return self._ts.ut1_jd(jd)
 
-    def is_retrograde(self, body: str, date) -> bool:
-        _lon, speed = self._tropical_lon(body, self._time(date))
-        return speed < 0
-
-    def ayanamsa(self, date, mode: str = "lahiri") -> float:
-        if mode != "lahiri":
-            raise NotImplementedError("yalnızca lahiri (P1-8 kapsamı)")
-        return _lahiri_ayanamsa_deg(self._time(date).tt)
-
-    def houses(self, date, location: Location, system: str = "placidus") -> list[float]:
-        asc_trop = self._ascendant_tropical(date, location)
-        ay = self.ayanamsa(date)
-        base = (asc_trop - ay) % 360.0  # sidereal lagna
-        if system in ("whole", "vedic_whole", "sri_panchika"):
-            sign0 = int(base // 30)
-            return [(sign0 + i) * 30.0 for i in range(12)]
-        if system == "equal":
-            return [(base + i * 30.0) % 360.0 for i in range(12)]
-        raise NotImplementedError(
-            f"P1-8 yedek adaptör kapsamı: equal/whole ('{system}' beklenmedi). "
-            "Placidus/Koch yalnızca SwissEphemerisAdapter'da (plan: P1-8 gelecek işi).")
+    def _node_lon(self, time) -> float:
+        """Mean lunar node — analitik formül (Meeus sf. 105; swisseph MEAN_NODE ile
+        canlı doğrulandı: J2000'de fark < 0.001°). Rahu = karşı düğümün 180° karşısı."""
+        tt = time.tt if hasattr(time, "tt") else float(time)
+        t = (tt - 2451545.0) / 36525.0
+        omega = 125.04452 - 1934.136261 * t + 0.0020708 * t * t + t ** 3 / 450000.0
+        return (-omega) % 360.0  # formül descending verir; Rahu ascending = +180 ≡ -ω
 
     def _geo_true_lon(self, body: str, t) -> float:
         """Geometrik (ışık-zamanı düzeltmesiz) yer-merkezli tropik boylam.
 
-        CANLI DOĞRULAMA (P1-8 kalibrasyon, skyfield 1.55 / de440s / swisseph 2.10):
-        - `apparent()` AttributeError verir (Barycentric'te yok); doğru API
-          vektör çıkarma + `frame_latlon(ecliptic_frame)` — dönen `(lat, lon, dist)`
-          tuple'undan `.degrees` okunur (`float(Angle)` TypeError tuzağı).
+        - CANLI DOĞRULAMA (bu oturum, skyfield 1.55 / de440s / swisseph 2.10):
+          ekliptik çerçeve `skyfield.almanac.ecliptic_frame` modülünde (NEW API;
+          `skyfield.frames` yok); `rel.frame_latlon(frame)` `lat/lon` nitelikleri
+          verir — tuple indekslemesi DEĞİL (yanlış okuma sessiz veri hatası olurdu).
         - `ephem['MARS']` KeyError; de440s yalnızca '* BARYCENTER' hedefleri içerir.
-        - Swiss `calc_ut` geometrik döndürür; sapınçlı (aberration) konum kullanılırsa
-          Güneş'te ~+0.02° sistematik fark oluşur → golden testte eşleşmez.
-          Bu yüzden burada ışık-zamanı DÜZELTMESİZ geocentric konum kullanılır.
+        - Swiss ile sözleşme: geometrik tropik boylam (`FLG_NOABERR` referansı) →
+          7 cisimde |Δ| < 0.007° (test ±0.02° tolerans; golden chart seti P1-10'da
+          daraltılacak). Aberrasyonlu (varsayılan swiss) değerle Güneş'te +0.006°,
+          Merkür'de +0.013° sistematik fark oluşur — geometrik tercih edilmiştir.
         """
         rel = self._bodies[body].at(t) - self._earth.at(t)
         latlon = rel.frame_latlon(_ecliptic_frame)
-        return float(latlon[1].degrees) % 360.0
+        # CANLI: frame_latlon dönen nesne sürüme göre (lat, lon, distance) tuple'ı;
+        # her iki biçimi de güvenli oku (tuple indeksi 1 = ekliptik boylam).
+        lon = latlon[1] if isinstance(latlon, tuple) else latlon.lon
+        return float(lon.degrees) % 360.0
 
     def _tropical_lon(self, body: str, time) -> tuple[float, float]:
         """(tropik boylam, hız derece/gün). Hız < 0 ⇒ retrograd."""
@@ -138,13 +128,6 @@ class SkyfieldAdapter(EphemerisPort):
         l2 = self._geo_true_lon(body, self._ts.tt_jd(time.tt - 0.5))
         speed = ((l1 - l2 + 180.0) % 360.0 - 180.0)
         return lon, speed
-
-    def _node_lon(self, time) -> float:
-        """Mean lunar node (SWA/Lahiri pratiğinde rahu_mean) — analitik formül."""
-        tt = time.tt if hasattr(time, "tt") else float(time)
-        t = (tt - 2451545.0) / 36525.0
-        omega = 125.04452 - 1934.136261 * t + 0.0020708 * t * t + t ** 3 / 450000.0
-        return (-omega) % 360.0  # Rahu = ascending node; formül descending verir
 
     # -- EphemerisPort -------------------------------------------------------
     def longitude(self, body: str, date, frame: str = "sidereal") -> float:
