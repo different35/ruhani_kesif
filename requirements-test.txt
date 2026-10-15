@@ -1,0 +1,7 @@
+# Test/CI bağımlılıkları — sürümler sabit (oracle değişimi ayrı bir spec kararıdır).
+# Üretim motoru: skyfield. pyswisseph YALNIZCA test oracle'ıdır (AGPL; üretimde import edilmez).
+skyfield==1.55
+jplephem==2.24
+numpy>=2.0
+pyswisseph==2.10.3.2
+pytest>=8
