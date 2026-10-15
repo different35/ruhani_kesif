@@ -7,11 +7,17 @@ Balanca:   doğum anında Ay'ın İÇİNDE OLDUĞU nakshatra lordunun dasha'sı 
            kalan süre = YEARS[current_lord] * (1 - frac_elapsed).
 Doğumdan önceki (tüketilen) kısım takvime girmez; timeline bu yüzden tam
 döngüde 120 yıl DEĞİL, 120 − tüketilen kısım yıldır (9 MD: balance + 8 tam MD).
+
+LİSANS TEMİZLİĞİ (bu oturum): modül `swisseph` İMPORT ETMEZ. JD↔takvim geri
+dönüşümü yerel `engine.calendar.revjul` ile yapılır (aynı sözleşme: girdi UT
+JD, çıktı (y,m,d,ondaylık saat)). Ayrıca önceki revizyonda yetim kalan
+`_build_segment`/`antardashas_of_md` metotları (sınıf gövdesi silinmişti —
+modül import edilemez durumdaydı) modül düzeyinde fonksiyon olarak restore
+edildi; adlandırma sözleşmesi: `build_segment`, `antardashas_of_md`.
 """
 from __future__ import annotations
 
-import swisseph as swe
-
+from engine.calendar import julday, revjul
 from engine.nakshatra import NAKSHATRAS, nakshatra_pada
 
 # TEK KAYNAK: tüm katmanlar (facts.py dahil) yılı buradan import eder.
@@ -83,6 +89,57 @@ def balance_years(moon_sidereal_lon: float, smooth: bool = False):
     return balance, current_lord, current_lord
 
 
+def build_segment(lord: str, sub: str, seg_start: float,
+                  seg_end: float) -> dict:
+    """Tek AD segmenti — TEK KAYNAK.
+
+    `years` = GERÇEK görünür süre (end−start), nominal değil: doğumda
+    kesilen ilk AD'de bu değer kırpık kalandır (ör. 2.7 − 1.95 = 0.75).
+    facts.dasha_tree'in `years` alanı ise sözleşme gereği TAM nominal yıldır;
+    segment süresi her iki yapıta da end−start farkından türetilebilir.
+    """
+    return {"mahadasha": lord, "antardasha": sub,
+            "start_utc": revjul(seg_start, 1),
+            "end_utc": revjul(seg_end, 1),
+            "years": round((seg_end - seg_start) / YEAR, 3)}
+
+
+def antardashas_of_md(moon_sidereal_lon: float, birth_jd_ut: float,
+                      md_index: int = 0, smooth: bool = False) -> list[dict]:
+    """Bir MD'ın TÜM AD'lerini takvimle döndürür (golden PyJHora testi için).
+
+    Sanal başlangıç kuralı `vimshottari` ile birebir aynıdır (tek kaynak:
+    `build_segment` + consumed-shift). md_index=0 → balanca ile açılan ilk
+    MD; tüketilen AD'ler burada da yayınlanmaz, doğumda kesilen AD başlangıcı
+    doğumda olarak görünür.
+    """
+    rem_years, start_lord, _c = balance_years(moon_sidereal_lon, smooth)
+    lord_i = LORDS.index(start_lord)
+    seq = [LORDS[(lord_i + k) % 9] for k in range(9)]
+    lord = seq[md_index]
+    if md_index == 0:
+        start = birth_jd_ut
+        # consumed = TAM MD yılı − kalan (balance). Eskiden `YEARS[lord] - rem`
+        # yerine ters yazılmıştı; aynı ifade gibi görünse de testte 1.05/2.7
+        # karışıklığından doğan sapma burada netleştirildi (canlı doğrulama:
+        # Ay 199.4667° → Swati pada 4 → frac_exact .75 → balance 4.5 →
+        # consumed 13.5 yıl; Rahu-Venus AD'si doğumda 1.05 yıl kalmış kesilir).
+        consumed_days = (YEARS[lord] - rem_years) * YEAR
+    else:
+        start = birth_jd_ut + rem_years * YEAR \
+            + sum(YEARS[s] for s in seq[1:md_index]) * YEAR
+        consumed_days = 0.0
+    out = []
+    cursor = start - consumed_days          # SANAL başlangıç (doğumdan ÖNCE)
+    for sub in ANTARDASHA_ORDER[lord]:
+        sub_full_days = YEARS[lord] * YEARS[sub] / 120.0 * YEAR
+        seg_start, seg_end = max(cursor, start), cursor + sub_full_days
+        if seg_end > seg_start:
+            out.append(build_segment(lord, sub, seg_start, seg_end))
+        cursor = seg_end
+    return out
+
+
 def vimshottari(moon_sidereal_lon: float, birth_jd_ut: float,
                 smooth: bool = False) -> list[dict]:
     """Doğumdan itibaren MD+AD takvimi (julian day UT cinsinden).
@@ -111,15 +168,12 @@ def vimshottari(moon_sidereal_lon: float, birth_jd_ut: float,
         # ulaşan ilk AD kısmen tüketilmiş olabilir ve segmenti doğumda kesilir.
         consumed_days = (YEARS[lord] - yrs) * YEAR if i_md == 0 else 0.0
         sub_cursor = start - consumed_days     # SANAL başlangıç (doğumdan ÖNCE)
-        for si, sub in enumerate(sub_seq):
+        for sub in sub_seq:
             sub_full_days = YEARS[lord] * YEARS[sub] / 120.0 * YEAR  # balancadan bağımsız
-            seg_start = max(sub_cursor, start)   # doğumdan önceki kısak görünmez
+            seg_start = max(sub_cursor, start)   # doğumdan önceki kısım görünmez
             seg_end = sub_cursor + sub_full_days
             if seg_end > seg_start:
-                md_list.append({"mahadasha": lord, "antardasha": sub,
-                                "start_utc": swe.revjul(seg_start, 1),
-                                "end_utc": swe.revjul(seg_end, 1),
-                                "years": round((seg_end - seg_start) / YEAR, 3)})
+                md_list.append(build_segment(lord, sub, seg_start, seg_end))
             sub_cursor = seg_end
         cursor = end
     return md_list
