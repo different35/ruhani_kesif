@@ -22,6 +22,10 @@ from engine.skyfield_adapter import SkyfieldAdapter
 
 UTC = dt.timezone.utc
 J2000 = dt.datetime(2026, 1, 1, 12, tzinfo=UTC)
+# J2026: takvim etiketi — modülde tüm "J2000" adlı datetime'ler aslında
+# 2026-01-01 12:00 UTC'dir (JD2026 ile aynı an). Eksik tanımdan doğan
+# NameError düzeltildi (canlı test bulgusu, bu oturum).
+J2026 = J2000
 JD2026 = swe.julday(2026, 1, 1, 12.0)
 
 PLANETS = ["sun", "moon", "mercury", "venus", "mars", "jupiter", "saturn"]
@@ -189,8 +193,15 @@ def test_events_station_detected(sk):
                      dt.datetime(2026, 3, 6, tzinfo=UTC)), "mercury")
     stations = [e for e in evs if e["type"] == "station"]
     assert len(stations) >= 1
-    # swiss referansı: hız işareti değişimi aynı gün içinde
+    # swiss referansı: hız işareti değişimi aynı gün içinde.
+    # DÜZELTME (canlı bulgu): pyswisseph 2.10 `calc_ut` tek cisimde düz liste
+    # döndürür — `[1][0]` TypeError üretiyordu; doğru indeksleme `[0][3]`.
     jd = swe.julday(2026, 2, 26, 0.0)
-    sp_before = swe.calc_ut(jd - 1.0, swe.MERCURY)[1][0]
-    sp_after = swe.calc_ut(jd + 1.0, swe.MERCURY)[1][0]
-    assert sp_before < 0 and sp_after > 0 or True  # işaret değişimi istasyonla uyumlu
+    sp_before = swe.calc_ut(jd - 1.0, swe.MERCURY)[0][3]
+    sp_after = swe.calc_ut(jd + 1.0, swe.MERCURY)[0][3]
+    assert (sp_before < 0) != (sp_after < 0), "swiss referansında işaret değişimi yok"
+    # gerçek iddia: istasyon olayının tarihi swiss hız işareti değişimiyle uyumlu
+    st = stations[0]["ut"][:10]
+    jd_st = swe.julday(*map(int, st.split("-")), 0.0)
+    assert (swe.calc_ut(jd_st - 1.0, swe.MERCURY)[0][3] < 0) \
+        != (swe.calc_ut(jd_st + 1.0, swe.MERCURY)[0][3] < 0)

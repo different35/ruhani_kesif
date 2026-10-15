@@ -29,8 +29,7 @@ from __future__ import annotations
 
 import datetime as dt
 
-import swisseph as swe
-
+from engine.calendar import julday
 from engine.dasha import ANTARDASHA_ORDER, LORDS, YEARS, SIDEREAL_YEAR, balance_years
 from engine.ephemeris_port import EphemerisPort, Location
 from engine.nakshatra import nakshatra_pada
@@ -139,9 +138,11 @@ def birth_facts(port: EphemerisPort, when: dt.datetime, loc: Location,
     out["moon_nakshatra"] = out["planets"]["moon"]["nakshatra"]
     out["houses"] = port.houses(when_utc, loc)
     # GÜN + SAAT hassasiyeti korunur (eskisi [:3] ile saati atıyordu).
-    jd_ut = swe.julday(when_utc.year, when_utc.month, when_utc.day,
-                       when_utc.hour + when_utc.minute / 60
-                       + (when_utc.second + when_utc.microsecond / 1e6) / 3600)
+    # LİSANS TEMİZLİĞİ: swe.julday yerine yerel engine.calendar.julday (aynı
+    # sözleşme: takvim alanları + UT saat -> JD(UT)).
+    jd_ut = julday(when_utc.year, when_utc.month, when_utc.day,
+                   when_utc.hour + when_utc.minute / 60
+                   + (when_utc.second + when_utc.microsecond / 1e6) / 3600)
     moon_sid = out["planets"]["moon"]["sidereal"]
     out["dasha_tree"] = dasha_tree(moon_sid, jd_ut)
     return out
