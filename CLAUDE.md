@@ -11,6 +11,7 @@ Bu repo'da çalışan her ajan oturumu için bağlayıcıdır. Ayrıntılar bağ
 - Taban ve hedef **daima `main`** (ADR-002). Başka bir özellik dalına PR açma veya merge etme.
 - Bir tur = bir spec = bir PR. Kapsam dışı bulgu → spec'in "kapsam dışı" bölümüne / INDEX kuyruğuna.
 - PR açmadan önce `make check` yeşil olmalı; PR gövdesi `.github/pull_request_template.md`.
+- **Merge kapısı (ADR-003):** GitHub Actions bu hesapta kullanılamıyor. Merge'den hemen önce `make gate SHA=<head>` koş, raporu PR'a yorum olarak yaz; GEÇTİ değilse veya SHA head'den farklıysa merge etme.
 
 ## Kanıt
 - "X şöyle çalışır" diyen her cümle (kütüphane davranışı, kök neden) çalıştırılmış komut çıktısıyla desteklenir.
@@ -24,4 +25,4 @@ Bu repo'da çalışan her ajan oturumu için bağlayıcıdır. Ayrıntılar bağ
 - Üretim motoru yalnız Skyfield; `swisseph`/`PyJHora` yalnız test oracle'ı.
 
 ## Komutlar
-`make check` (CI ile birebir) · `make test` · `make verify` · `make mutation` · `make help`
+`make check` · `make gate` (merge kapısı) · `make test` · `make verify` · `make mutation` · `make help`

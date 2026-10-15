@@ -102,7 +102,7 @@ mutasyon kanıtıyla yapılır (testin boş olmadığının kanıtı).
 - Tek gövde (trunk): `main`. Her tur `main`'den açılan kısa ömürlü dalda yapılır.
 - PR başlığı: `SPEC-NNN: <kısa hedef>`; gövde [PR şablonu](../../.github/pull_request_template.md) ile.
 - PR `main` dışında bir dala **merge edilmez** (zincirleme merge geçmişi bozar).
-- Merge koşulu: CI (`pytest` check'i = `make check`) yeşil + DoD tamam + Sahip onayı.
+- Merge koşulu: PR'ın son commit'inde `make gate` **GEÇTİ** (rapor PR'da; [ADR-003](../adr/ADR-003-local-ci-gate.md)) + DoD tamam + Sahip onayı.
 - Spec PR'ları squash ile, konsolidasyon PR'ları merge commit ile birleşir; dal merge sonrası silinir.
 
 ## 7. Tur sonu "devir notu" formatı

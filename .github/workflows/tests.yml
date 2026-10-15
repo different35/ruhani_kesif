@@ -1,11 +1,10 @@
 name: tests
 
-# Zorunlu durum kontrolü: job adı "pytest" (.github/rulesets/main-protection.json bunu bekler;
-# adı değiştirirseniz ruleset'i de güncelleyin).
+# ADR-003: Bu hesapta GitHub Actions kalıcı olarak kullanılamıyor (faturalama kilidi).
+# Merge kapısı YEREL: `make gate` (scripts/ci-gate.sh). Bu workflow yalnız elle
+# tetiklenir; Actions bir gün erişilebilir olursa push/pull_request tetikleyicileri
+# geri eklenir ve ruleset'e "pytest" zorunlu kontrolü konur (REPO_SETTINGS §5).
 on:
-  push:
-    branches: [main]
-  pull_request:
   workflow_dispatch:
 
 permissions:

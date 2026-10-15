@@ -34,7 +34,8 @@
    `main`'in atası olur ve silinmeleri hiçbir commit'i kaybettirmez. (Arşiv etiketi
    denendi; oturum proxy'si etiket push'una izin vermedi.)
 5. `main` koruması `.github/rulesets/main-protection.json` ile; merge sonrası dal
-   otomatik silme açık; birleşmiş dallar `branch-cleanup` workflow'uyla temizlenir.
+   otomatik silme açık; eski dallar elle silinir (`branch-cleanup` workflow'u Actions
+   kilidi nedeniyle kaldırıldı — ADR-003).
    Kurulum adımları: [REPO_SETTINGS.md](../process/REPO_SETTINGS.md). Akış: [CONTRIBUTING.md](../../CONTRIBUTING.md).
 
 ## Sonuçlar

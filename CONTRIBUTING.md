@@ -11,7 +11,7 @@ Nasıl test edileceği: [docs/process/TEST_STANDARD.md](docs/process/TEST_STANDA
 | Yerel makine | `make setup` (Python 3.12; `uv` varsa onu, yoksa `venv+pip` kullanır) |
 | VS Code / Codespaces | `.devcontainer/` ile aç → `make setup` otomatik çalışır |
 | Claude Code bulut oturumu | `.claude/hooks/session-start.sh` oturum açılırken `make setup` eşdeğerini çalıştırır ve `.venv`'i PATH'e ekler |
-| CI (GitHub Actions) | `.github/workflows/tests.yml` → `make check` |
+| **Merge kapısı** (ADR-003) | `make gate` — commit'i temiz kopyada, sıfırdan ortamla `make check`'ten geçirir ve kanıt raporu üretir. GitHub Actions bu hesapta kullanılamıyor; `tests.yml` yalnız elle tetiklenir |
 
 Kurulumun tek kaynağı `scripts/setup-dev.sh`, bağımlılıkların tek kaynağı
 `requirements-test.txt` (sürümler sabit). `requirements.txt` yalnızca araştırma
@@ -19,7 +19,8 @@ ortamı içindir (PyJHora, kerykeion); CI ve test suite onlara ihtiyaç duymaz.
 
 ```bash
 make help      # tüm hedefler
-make check     # PR açmadan önce ZORUNLU: lint + lisans bekçisi + tüm testler (CI ile birebir)
+make check     # PR açmadan önce ZORUNLU: lint + lisans bekçisi + tüm testler
+make gate      # MERGE öncesi ZORUNLU: PR head commit'ini temiz kopyada doğrula + rapor (SHA=<commit>)
 make test      # hızlı döngü (oracle ızgarası hariç)
 make verify    # yalnız oracle ızgarası
 make mutation  # mutasyon kanıtı örneği
@@ -47,8 +48,9 @@ main ──●──────────●──────────●
 2. Spec'i yaz: `docs/specs/SPEC-NNN-*.md` (şablon), `docs/specs/INDEX.md` durumunu güncelle.
 3. Uygula + test et. Commit mesajı: `SPEC-NNN: <emir kipinde özet>` (gövdede kanıt satırları).
 4. `make check` yeşil → push → **Draft PR** (`main`'e). Gövde `.github/pull_request_template.md` ile dolar.
-5. CI (`pytest` check'i) yeşil + DoD tamam → "Ready for review".
-6. Sahip onayı → **Squash and merge** (başlık: `SPEC-NNN: ...`). Dal otomatik silinir.
+5. DoD tamam → dal `main` ile güncel değilse `git merge origin/main` → push.
+6. **Kapı:** `make gate SHA=<PR'ın son commit'i>` → rapor **GEÇTİ ✅** olmalı → raporu PR'a yorum olarak yapıştır → "Ready for review".
+7. Sahip onayı → merge öncesi raporun SHA'sı PR'ın **şu anki** head SHA'sıyla aynı mı bak (sonradan push geldiyse kapıyı yeniden koş) → **Squash and merge** (başlık: `SPEC-NNN: ...`). Dal otomatik silinir.
 
 Merge yöntemi: Spec PR'ları **squash** (bir spec = `main`'de bir commit). Geçmişi
 korunması gereken konsolidasyon PR'ları (ör. PR #12) **merge commit** ile birleştirilir.
@@ -57,11 +59,13 @@ korunması gereken konsolidasyon PR'ları (ör. PR #12) **merge commit** ile bir
 
 Ayrıntılı adımlar: [docs/process/REPO_SETTINGS.md](docs/process/REPO_SETTINGS.md).
 Özet: ruleset `.github/rulesets/main-protection.json` içe aktarılır →
-`main`'e doğrudan push, silme ve force-push kapanır; PR + `pytest` check'i zorunlu olur.
+`main`'e doğrudan push, silme ve force-push kapanır; `main`'e yalnız PR ile girilir.
+Test kapısı GitHub'da değil, §3 adım 6'da (`make gate`) uygulanır (ADR-003).
 
 ## 5. Yapılmayacaklar
 
 - `main`'e doğrudan push · başka özellik dalına PR · force-push / rebase ile paylaşılmış geçmişi yeniden yazma
+- `make gate` raporu GEÇTİ olmadan veya raporun SHA'sı head SHA'dan farklıyken merge etmek
 - Testi atlamak/devre dışı bırakmak/toleransı sonuç geçsin diye gevşetmek
 - Kanıtsız iddia (DEVELOPMENT_PROCESS §4)
-- Üretim motorunda `swisseph` import'u (CI bekçisi kırar)
+- Üretim motorunda `swisseph` import'u (`make check` lisans bekçisi kırar)

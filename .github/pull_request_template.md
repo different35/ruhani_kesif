@@ -11,9 +11,13 @@ SPEC-NNN — <başlık> (`docs/specs/SPEC-NNN-*.md`)
 
 ## Kanıt
 ```
-$ python -m pytest -q
+$ make check
 <özet satırı>
 ```
+
+### Merge kapısı (ADR-003) — merge'den hemen önce, PR'ın son commit'inde
+<!-- `make gate SHA=<head>` çıktısındaki tabloyu buraya veya PR yorumuna yapıştırın.
+     Rapordaki Commit = PR'ın şu anki head SHA'sı olmalı; sonradan push geldiyse yeniden koşun. -->
 
 ### Mutasyon
 ```
@@ -25,6 +29,7 @@ $ python -m pytest -q
 ## DoD kontrol listesi
 - [ ] Tüm AC'ler kanıtlı
 - [ ] Suite tamamen yeşil
+- [ ] `make gate` raporu GEÇTİ ✅ ve SHA = head SHA
 - [ ] Mutasyon kanıtı eklendi
 - [ ] `VERIFICATION.md` güncellendi (yanlış çıkan eski iddialar "DÜZELTİLDİ" notuyla)
 - [ ] `BACKLOG.md` ve `docs/specs/INDEX.md` güncellendi

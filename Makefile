@@ -4,7 +4,7 @@
 VENV ?= .venv
 PY   := $(VENV)/bin/python
 
-.PHONY: help setup lint license test verify check mutation clean
+.PHONY: help setup lint license test verify check gate mutation clean
 
 help:            ## Hedefleri listele
 	@grep -E '^[a-z-]+:.*## ' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-10s %s\n", $$1, $$2}'
@@ -26,8 +26,11 @@ test: setup      ## Hızlı birim/sözleşme testleri (oracle ızgarası hariç)
 verify: setup    ## Oracle ızgarası (tests/verify)
 	$(PY) -m pytest -q tests/verify
 
-check: lint license  ## PR öncesi zorunlu: lint + lisans + TÜM testler (CI ile birebir)
+check: lint license  ## PR öncesi zorunlu: lint + lisans + TÜM testler (make gate bunu temiz kopyada koşar)
 	$(PY) -m pytest -q
+
+gate:            ## MERGE ÖNCESİ ZORUNLU (ADR-003): commit'i temiz kopyada doğrula + kanıt raporu. SHA=<commit>
+	@scripts/ci-gate.sh $(or $(SHA),HEAD)
 
 mutation: setup  ## SPEC-001 mutasyon örneği: kırmızı beklenir, dosya geri alınır
 	@sed -i 's/return self._ts.ut1_jd(jd_ut)/return self._ts.tt_jd(jd_ut)/' engine/skyfield_adapter.py

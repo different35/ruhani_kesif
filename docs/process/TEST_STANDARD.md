@@ -105,7 +105,7 @@ make check     # lint (ruff, yalnız hata sınıfları) + lisans bekçisi + tüm
 ```
 Debian/Ubuntu sistem Python'unda pyswisseph doğrudan pip ile derlenmez
 (setuptools `install_layout` hatası) — bu yüzden daima izole venv.
-CI: `.github/workflows/tests.yml` her PR'da `make check` koşar (job adı `pytest` = zorunlu check).
+Merge kapısı: `make gate` (ADR-003). Commit'i temiz bir kopyada sıfırdan ortamla `make check`'ten geçirir; GitHub Actions bu hesapta kullanılamıyor.
 Ortam tablosu: [CONTRIBUTING.md §1](../../CONTRIBUTING.md).
 
 ## 9. Yeni entegrasyon kontrol listesi (modül eklerken)

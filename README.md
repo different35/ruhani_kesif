@@ -10,7 +10,8 @@ ruhani yolculuğunuza rehberlik.
 ## Geliştirme
 ```
 make setup   # ortam (Python 3.12 .venv)
-make check   # lint + lisans bekçisi + tüm testler (CI ile birebir)
+make check   # lint + lisans bekçisi + tüm testler
+make gate    # merge kapısı: commit'i temiz kopyada doğrula + kanıt raporu (ADR-003)
 ```
 Akış ve dal modeli: **[CONTRIBUTING.md](CONTRIBUTING.md)**.
 
