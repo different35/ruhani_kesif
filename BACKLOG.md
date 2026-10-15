@@ -27,7 +27,7 @@ ya yapılmadı. Plan/proza belgesi yoktur; yalnızca üretilen kod ve açık iş
 | P1-5 | **Dasha timeline** (Vimshottari MD+AD, balance dahil) | ✅ | `engine/dasha.py` — 90 düğüm, süre toplamı kontrolü testte |
 | P1-6 | Transit tarayıcı (ingress olayları, binary refine ±~2sa) | ✅ | `events()` + `test_events_ingress_reference` (Güneş 2026-03-14 Kumbha→Meena) |
 | P1-7 | Ev sistemi (Placidus/Koch/Whole/Equal/Sri-Panchika) | ✅ | `houses()` + `test_houses_count_and_range` |
-| P1-8 | AstronomyEngine/Skyfield adaptörleri (lisanssız yedek) | 🟠 kısmi | `engine/skyfield_adapter.py`; boylam ≤2″ **doğrulandı** (SPEC-001); Lagna 14–66″ → SPEC-002; üretim doğuş çözücüsü yok → SPEC-003 |
+| P1-8 | AstronomyEngine/Skyfield adaptörleri (lisanssız yedek) | ⬜ | port arayüzü hazır, implementasyon bekliyor |
 | P1-9 | Varga seti (D1–D60) | ⬜ | JH adaptörü üzerinden |
 | P1-10 | 100 golden chart'ta %100 sayısal doğruluk | 🟠 kısmi | 8 test geçti; golden chart seti oluşturulmadı |
 
@@ -39,10 +39,9 @@ ya yapılmadı. Plan/proza belgesi yoktur; yalnızca üretilen kod ve açık iş
 3. **`jhora.const` importu global swisseph sid-mode'unu bozuyor** → adapter her hesapta modu yeniden kuruyor (regresyon testi `import jhora` ile çalışıyor).
 
 ## P2 — Kural tabanı + hüküm | P3 — Sima CV | P4 — Agent/UX | P5 — Monetizasyon | P6 — Flywheel
-⬜ Henüz kod yok. Tur sırası ve bağımlılıklar: **[docs/specs/INDEX.md](docs/specs/INDEX.md)** (SPEC-002 → SPEC-011).
-Süreç: [docs/process/DEVELOPMENT_PROCESS.md](docs/process/DEVELOPMENT_PROCESS.md).
+⬜ Henüz kod yok. Sıra (gist §12.1'e göre bağımlılık): P1-8 → P1-9/P1-10 → P2 kural şeması.
 
 ## Doğrulama komutu
 ```
-make check   # lint + lisans + 150 passed (SPEC-001)
+pip install -r requirements.txt && python -m pytest -q   # 8 passed
 ```
