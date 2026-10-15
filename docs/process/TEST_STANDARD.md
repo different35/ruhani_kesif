@@ -97,13 +97,16 @@ PR'a iki satır da yapıştırılır. Mutasyonda kırılan test sayısı 0 ise t
 
 ## 8. Ortam
 
+Tek kaynak `scripts/setup-dev.sh` + sabit sürümlü `requirements-test.txt`; her yerde aynı komut:
+
 ```bash
-# Debian/Ubuntu sistem Python'unda pyswisseph derlemesi setuptools 'install_layout'
-# hatası verir → izole venv kullanın:
-uv venv -p 3.12 .venv && uv pip install -p .venv/bin/python -r requirements-test.txt
-.venv/bin/python -m pytest -q
+make setup     # .venv (Python 3.12; uv varsa uv, yoksa venv+pip) — idempotent
+make check     # lint (ruff, yalnız hata sınıfları) + lisans bekçisi + tüm testler = CI
 ```
-CI: `.github/workflows/tests.yml` — her PR'da aynı komut koşar.
+Debian/Ubuntu sistem Python'unda pyswisseph doğrudan pip ile derlenmez
+(setuptools `install_layout` hatası) — bu yüzden daima izole venv.
+CI: `.github/workflows/tests.yml` her PR'da `make check` koşar (job adı `pytest` = zorunlu check).
+Ortam tablosu: [CONTRIBUTING.md §1](../../CONTRIBUTING.md).
 
 ## 9. Yeni entegrasyon kontrol listesi (modül eklerken)
 

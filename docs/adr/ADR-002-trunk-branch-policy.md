@@ -2,7 +2,7 @@
 
 | Alan | Değer |
 |---|---|
-| Durum | **Proposed** — Sahip kararı bekliyor |
+| Durum | **Accepted** (Sahip onayı: 2026-10-15) |
 | Tarih | 2026-10-15 |
 | İlgili spec | — (süreç) |
 | Karar sahibi | proje sahibi |
@@ -21,15 +21,21 @@
   (PR #10'u geri alır: "swisseph bağımlılığını üretimden çıkar" değişikliği).
 - Sonuç: "Projenin güncel hali nedir?" sorusunun cevabı hangi dala bakıldığına göre değişiyor.
 
-## Karar (önerilen)
+## Karar
 
 1. **`main` tek gövdedir.** Tüm tur PR'ları `main`'i hedefler.
 2. Konsolidasyon: SPEC-001 PR'ı (`vimshottari-dasha-bug-fix-af94a` tabanlı)
    onaylandıktan sonra `main`'e merge edilir → `main` en güncel kodu içerir.
-3. `revert-10-…` dalı için Sahip kararı: PR #10 (swisseph'in üretimden çıkarılması)
-   ADR-001 ve TEST_STANDARD §1 ile uyumludur → **dalın silinmesi önerilir**.
-4. Konsolidasyondan sonra eski yan dallar arşivlenir (silinir veya `archive/` önekiyle etiketlenir).
-5. `main` için dal koruması: CI (`tests.yml`) zorunlu, doğrudan push kapalı.
+3. `revert-10-…` dalının commit'i (PR #10'un geri alınması) ADR-001 ve TEST_STANDARD §1
+   ile çeliştiği için **uygulanmaz**; ancak veri kaybı olmasın diye konsolidasyon
+   commit'ine `-s ours` ebeveyni olarak bağlanır (geçmişte durur, ağaca girmez).
+4. Konsolidasyon yöntemi: tüm yan dal uçları tek bir `git merge -s ours` commit'iyle
+   gövde geçmişine bağlanır (ağaç değişmez — doğrulandı). Böylece 8 dalın her biri
+   `main`'in atası olur ve silinmeleri hiçbir commit'i kaybettirmez. (Arşiv etiketi
+   denendi; oturum proxy'si etiket push'una izin vermedi.)
+5. `main` koruması `.github/rulesets/main-protection.json` ile; merge sonrası dal
+   otomatik silme açık; birleşmiş dallar `branch-cleanup` workflow'uyla temizlenir.
+   Kurulum adımları: [REPO_SETTINGS.md](../process/REPO_SETTINGS.md). Akış: [CONTRIBUTING.md](../../CONTRIBUTING.md).
 
 ## Sonuçlar
 - Olumlu: Tek gerçeklik kaynağı; CI'ın anlamlı olması.

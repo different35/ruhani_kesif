@@ -97,12 +97,13 @@ mutasyon kanıtıyla yapılır (testin boş olmadığının kanıtı).
 - Tolerans değişikliği ayrı bir karardır: gerekçesi (oracle belirsizliği,
   fiziksel sınır) spec'te yazılmadan tolerans gevşetilemez.
 
-## 6. Dal ve PR politikası (bkz. [ADR-002](../adr/ADR-002-trunk-branch-policy.md))
+## 6. Dal ve PR politikası (bkz. [ADR-002](../adr/ADR-002-trunk-branch-policy.md), uygulama: [CONTRIBUTING.md](../../CONTRIBUTING.md))
 
 - Tek gövde (trunk): `main`. Her tur `main`'den açılan kısa ömürlü dalda yapılır.
 - PR başlığı: `SPEC-NNN: <kısa hedef>`; gövde [PR şablonu](../../.github/pull_request_template.md) ile.
 - PR `main` dışında bir dala **merge edilmez** (zincirleme merge geçmişi bozar).
-- Merge koşulu: CI yeşil + DoD tamam + Sahip onayı.
+- Merge koşulu: CI (`pytest` check'i = `make check`) yeşil + DoD tamam + Sahip onayı.
+- Spec PR'ları squash ile, konsolidasyon PR'ları merge commit ile birleşir; dal merge sonrası silinir.
 
 ## 7. Tur sonu "devir notu" formatı
 

@@ -44,6 +44,5 @@ Süreç: [docs/process/DEVELOPMENT_PROCESS.md](docs/process/DEVELOPMENT_PROCESS.
 
 ## Doğrulama komutu
 ```
-uv venv -p 3.12 .venv && uv pip install -p .venv/bin/python -r requirements-test.txt
-.venv/bin/python -m pytest -q   # 150 passed (SPEC-001)
+make check   # lint + lisans + 150 passed (SPEC-001)
 ```
