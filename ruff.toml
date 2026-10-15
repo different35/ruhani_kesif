@@ -1,0 +1,9 @@
+# Lint politikası (docs/process/TEST_STANDARD.md §8). Aşama 1: yalnızca gerçek
+# hata sınıfları — sözdizimi (E9), geçersiz karşılaştırma (F63), ifade hataları (F7),
+# tanımsız isim (F82), yeniden tanım/gölgeleme (F811), kullanılmayan değişken (F841).
+# Stil kuralları (import sırası, satır uzunluğu, F401) ayrı bir spec ile açılır.
+target-version = "py312"
+extend-exclude = ["data"]
+
+[lint]
+select = ["E9", "F63", "F7", "F82", "F811", "F841"]

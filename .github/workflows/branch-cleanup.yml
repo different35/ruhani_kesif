@@ -1,0 +1,39 @@
+name: branch-cleanup
+
+# Dal hijyeni (ADR-002): main'e TAMAMEN dahil olmuş (merged) uzak dalları listeler,
+# dry_run=false ise siler. main'de olmayan tek bir commit'i bile taşıyan dala DOKUNMAZ.
+# Elle tetiklenir: Actions → branch-cleanup → Run workflow.
+on:
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "Yalnız listele (silme yok)"
+        type: boolean
+        default: true
+
+permissions:
+  contents: write
+
+jobs:
+  cleanup:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: List / delete branches fully merged into main
+        env:
+          DRY_RUN: ${{ inputs.dry_run }}
+        run: |
+          set -euo pipefail
+          git fetch --prune origin
+          merged=$(git branch -r --merged origin/main --format='%(refname:short)' \
+                   | sed 's#^origin/##' | grep -vE '^(main|HEAD|origin)$' || true)
+          if [ -z "$merged" ]; then echo "Silinecek birleşmiş dal yok."; exit 0; fi
+          echo "main'e tamamen dahil olan dallar:"; echo "$merged" | sed 's/^/  - /'
+          if [ "$DRY_RUN" = "true" ]; then echo "dry_run=true → silme yapılmadı."; exit 0; fi
+          for b in $merged; do
+            git merge-base --is-ancestor "origin/$b" origin/main   # son güvenlik kontrolü
+            git push origin --delete "$b"
+          done

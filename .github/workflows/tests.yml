@@ -1,0 +1,33 @@
+name: tests
+
+# Zorunlu durum kontrolü: job adı "pytest" (.github/rulesets/main-protection.json bunu bekler;
+# adı değiştirirseniz ruleset'i de güncelleyin).
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: tests-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pytest:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version-file: .python-version
+          cache: pip
+          cache-dependency-path: requirements-test.txt
+      # Yerel/devcontainer/ajan oturumuyla aynı kurulum ve aynı komut (CONTRIBUTING §1).
+      - name: Setup (scripts/setup-dev.sh)
+        run: scripts/setup-dev.sh
+      - name: make check (lint + license guard + full test suite)
+        run: make check
