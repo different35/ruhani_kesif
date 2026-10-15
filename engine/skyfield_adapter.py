@@ -308,10 +308,7 @@ class SkyfieldAdapter(EphemerisPort):
     def is_retrograde(self, body: str, date) -> bool:
         if body not in _BODIES:
             raise ValueError(f"bilinmeyen gök cismi: {body!r}")
-        # numpy bool sızıntısı düzeltmesi (bu oturum, canlı bulgu): skyfield
-        # hızları numpy float döndürür; `np.True_ is True` False'tur ve JSON
-        # serileştirmesini de kırar. Sözleşme: YERLİ bool.
-        return bool(self.velocity(body, date) < 0)
+        return self.velocity(body, date) < 0
 
     def ayanamsa(self, date, mode: str | None = None) -> float:
         """Ayanamsa (derece). mode=None → nesnenin modu (tutarlılık ilkesi:

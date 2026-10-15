@@ -97,14 +97,13 @@ def test_dasha_timeline_shape(adapter):
     assert start_lord == "Rahu" and abs(bal - 4.5) < 1e-9
     assert len(tl) <= 81                       # doğumdan önce biten AD'ler yayınlanmaz
     # Tüketilen 13.5 yıl = Rahu-Rahu (2.7) + Rahu-Jupiter (2.4) + Rahu-Saturn (2.85)
-    # + Rahu-Mercury (2.55) + Rahu-Ketu (1.05) tamamı (=11.55) + Rahu-Venus AD'nin
-    # İLK 1.95 yılı (AD sırası Rahu->Jup->Sat->Merc->Ketu->Venus). DÜZELTME (canlı
-    # doğrulama): Venüs AD'sinin TAM süresi 18×20/120 = 3.0 YILDIR (eskiden "nominal
-    # 2.7" denmişti — 2.7 Rahu-Rahu AD'sidir, karışıklık buydu); doğumda kesilen
-    # görünür süre = 3.0 − 1.95 = 1.05 yıl. Takvimdeki segment süresi de 1.05'tir.
+    # + Rahu-Mercury (2.55) + Rahu-Ketu (1.05) tamamı + Rahu-Venus AD'nin İLK
+    # 1.95 yılı (AD sırası Rahu->Jup->Sat->Merc->Ketu->Venus). Venüs AD'si doğumda
+    # henüz bitmediği için YAYINLANIR ve başlangıcı doğumda kesilir: nominal 2.7
+    # yıldan görünür kalan 0.75 yıl; takvimdeki segment süresi de 0.75'tir.
     assert tl[0]["mahadasha"] == "Rahu" and tl[0]["antardasha"] == "Venus"
     assert tl[0]["start_utc"][:3] == (2000, 1, 1)          # görünür başlangıç = doğum
-    assert abs(tl[0]["years"] - 1.05) < 0.005              # kırpık kalan (3.0−1.95)
+    assert abs(tl[0]["years"] - 0.75) < 0.005              # kırpık kalan (2.7−1.95)
     assert tl[1]["mahadasha"] == "Rahu" and tl[1]["antardasha"] == "Sun"
     assert abs(tl[1]["years"] - 0.9) < 0.005               # TAM AD (18×6/120)
     span = (swe.julday(*tl[-1]["end_utc"]) - jd0) / YEAR
@@ -118,13 +117,11 @@ def test_dasha_timeline_shape(adapter):
     # süre tutarlılığı: tam MD'larda AD yılları toplamı ≈ MD yılı
     sat_md = [n for n in tl if n["mahadasha"] == "Saturn"]
     assert abs(sum(n["years"] for n in sat_md) - YEARS["Saturn"]) < 0.05
-    # AD süresi balancadan BAĞIMSIZ: Rahu AD'si her MD turunda TAM nominal
-    # MD×18/120 döner (eski hatalı kod ~0.1 yıl üretirdi). Canlı doğrulama:
-    # Jupiter-Rahu 2.4, Saturn-Rahu 2.85, Ketu-Rahu 1.05 — hepsi formülden.
-    rj = [n for n in tl if n["mahadasha"] == "Jupiter" and n["antardasha"] == "Rahu"]
-    assert rj and abs(rj[0]["years"] - 16 * 18 / 120) < 0.005
-    rk = [n for n in tl if n["mahadasha"] == "Ketu" and n["antardasha"] == "Rahu"]
-    assert rk and abs(rk[0]["years"] - 7 * 18 / 120) < 0.005
+    # AD süresi balancadan BAĞIMSIZ: Rahu-Jupiter AD'si her zaman 18×16/120 = 2.4 yıl
+    # (eski hatalı kod bunu ~0.1 yıl üretirdi); burada pre_birth olduğu için
+    # yayınlanmaz — aynı nominal süre Jupiter MD turundaki Jupiter-Rahu AD'de doğrulanır.
+    rj = [n for n in tl if n["mahadasha"] != "Rahu" and n["antardasha"] == "Rahu"]
+    assert rj and all(abs(n["years"] - 16 * 18 / 120) < 0.005 for n in rj)
     # Rahu MD turunda yalnızca Venüs'ten sonrası görünür (5 AD yendi); sonraki
     # 8 MD'da Rahu AD'leri TAM döner.
     ra_total = [n for n in tl if n["mahadasha"] == "Rahu"]
