@@ -1,40 +1,18 @@
 """Vimshottari Dasha — gist BÖLÜM 3: 'aboneliğin ve retention'ın gerçek omurgası'.
 
-Standart Vimshottari kuralı (PyJHora `vimsottari_dasha_start_date` ile aynı):
+Yönerge (PyJHora davranışıyla birebir): başlangıç noktası Ay'ın nakshatra padası.
 MD sırası: Ketu->Venus->Sun->Moon->Mars->Rahu->Jupiter->Saturn->Mercury
-Yıllar:    7,20,6,10,7,18,16,19,17  (toplam 120; tek doğru kaynak YEARS dict'i)
-Balanca:   doğum anında Ay'ın İÇİNDE OLDUĞU nakshatra lordunun dasha'sı akar;
-           kalan süre = YEARS[current_lord] * (1 - frac_elapsed).
-Doğumdan önceki (tüketilen) kısım takvime girmez; timeline bu yüzden tam
-döngüde 120 yıl DEĞİL, 120 − tüketilen kısım yıldır (9 MD: balance + 8 tam MD).
-
-LİSANS TEMİZLİĞİ (bu oturum): modül `swisseph` İMPORT ETMEZ. JD↔takvim geri
-dönüşümü yerel `engine.calendar.revjul` ile yapılır (aynı sözleşme: girdi UT
-JD, çıktı (y,m,d,ondaylık saat)). Ayrıca önceki revizyonda yetim kalan
-`_build_segment`/`antardashas_of_md` metotları (sınıf gövdesi silinmişti —
-modül import edilemez durumdaydı) modül düzeyinde fonksiyon olarak restore
-edildi; adlandırma sözleşmesi: `build_segment`, `antardashas_of_md`.
+Yıllar:     7,7,6,10,7,12,16,19,20  (toplam 120)
+Balanca: doğum anında geçmiş dasha süresi düşülür (pada oranına göre).
 """
 from __future__ import annotations
 
-from engine.calendar import julday, revjul
-from engine.nakshatra import NAKSHATRAS, nakshatra_pada
-
-# TEK KAYNAK: tüm katmanlar (facts.py dahil) yılı buradan import eder.
-# PyJHora `const.sidereal_year` = 365.256364 (canlı doğrulandı) — birebir uyum.
-# Fallback Gregoryen ortalaması 365.2425'tir; o değer SIDEREAL DEĞİLDİR ve
-# yalnızca PyJHora kurulmadığında kullanılır.
-try:
-    from jhora import const as _jhora_const
-    SIDEREAL_YEAR = float(_jhora_const.sidereal_year)  # 365.256364
-except Exception:
-    SIDEREAL_YEAR = 365.2425  # Gregoryen ortalama yıl (sidereal DEĞİL — fallback)
-YEAR = SIDEREAL_YEAR  # geriye dönük takma ad (eski import'lar kırılmasın)
+from engine.nakshatra import NAKSHATRAS, PADAS_PER_NAK, SPAN_DEG
 
 LORDS = ["Ketu", "Venus", "Sun", "Moon", "Mars", "Rahu", "Jupiter", "Saturn", "Mercury"]
 YEARS = {"Ketu": 7, "Venus": 20, "Sun": 6, "Moon": 10, "Mars": 7,
          "Rahu": 18, "Jupiter": 16, "Saturn": 19, "Mercury": 17}
-# Standart Vimshottari: Ketu7 Venus20 Sun6 Moon10 Mars7 Rahu18 Jup16 Sat19 Merc17 = 120
+# düzeltme: standart Vimshottari: Ketu7 Venus20 Sun6 Moon10 Mars7 Rahu18 Jup16 Sat19 Merc17 = 120
 assert sum(YEARS.values()) == 120
 
 ANTARDASHA_ORDER = {
@@ -50,130 +28,63 @@ ANTARDASHA_ORDER = {
 }
 
 
-def balance_years(moon_sidereal_lon: float, smooth: bool = False):
-    """Vimshottari balanca kuralı — standart Jyotish + PyJHora referansı.
+def balance_years(moon_sidereal_lon: float, years_per_dasha: float = None):
+    """Vimshottari balanca kuralı — PyJHora `vimsottari_dasha_start_date` ile birebir
+    (kaynak: jhora/horoscope/dhasa/graha/vimsottari.py, AGPL referans davranışı):
 
       current_lord = Ay'ın İÇİNDE olduğu nakshatra'nın lordu (Swati -> Rahu)
-      frac_elapsed = nakshatra içinde geçilen oran (0..1)
-      balance      = YEARS[current_lord] * (1 - frac_elapsed)   <-- STANDART KURAL
-      start_lord   = current_lord (doğum, devam eden MD'ın ortasında açılır)
+      frac_elapsed = nakshatra içinde geçilen oran
+      balance      = next_lord_years * frac_elapsed     <-- JYOTISH STANDARDI
+      start_lord   = next_lord (Rahu sonrası -> Jupiter)
 
-    PyJHora `vimsottari_dasha_start_date` (canlı okundu) tam olarak bunu yapar:
-        nak = int(lon / (360/27));  rem = lon - nak*(360/27)
-        elapsed_yrs = (rem / one_star) * period          # DERECESEL (smooth)
-        start_date  = jd - elapsed_yrs * sidereal_year   # MD doğumdan GERİYE
-    Dolayısıyla PyJHora ile BİREBİR uyum = derecesel oran (smooth=True).
-    Klasik pada-sınırı sayımı (frac_exact ∈ {0,.25,.5,.75}) "temiz" golden
-    değerler üretir ve varsayılandır; iki mod arasındaki fark en fazla bir
-    pada süresidir (~1.7 yıl). Kaynak: engine.nakshatra (TEK KAYNAK).
-
-    Geçici bir sürümde `next_lord * frac_elapsed` kullanılmıştı — hiçbir
-    Jyotish kaynağında yoktur, geri alındı. Docstring'deki eski "0.72 vs
-    15.36" sayısı da hatalıydı (0.72 = 18×0.04 derecesel, 15.36 = 16×0.96 —
-    iki FARKLI lord karıştırılmıştı); aynı olayın doğru ifadeleri:
-      derecesel: 18 × (1 − 0.95999) ≈ 0.72 yıl   (PyJHora ile birebir)
-      pada-sınırı: 18 × (1 − 0.75) = 4.5 yıl     (Swati pada 4)
-
-    Golden testler (varsayılan pada-sınırı modu):
-      Ay 190° (Swati, frac 0.25) -> (13.5, "Rahu", "Rahu")   [18 × 0.75]
-      Ay 0°   (Ashwini, frac 0)   -> (7.0,  "Ketu", "Ketu")  [7 × 1.0]
-
-    Dönüş: (balance_years, start_lord, current_lord).
+    Gist §3 "aboneliğin omurgası" dediği için bu fonksiyon kritik yol: önceki
+    sürümde `current_full * (1-frac)` kullanılıyordu (yanlış formül; Swati örneğinde
+    0.72 yıl yerine 15.36 yıl çıkmalı). Düzeltme + golden test eklendi.
     """
-    np_ = nakshatra_pada(moon_sidereal_lon)
-    idx = np_["nakshatra_index"]
-    # TEK KAYNAK: oran engine.nakshatra'dan gelir; burada yeniden hesaplanmaz.
-    frac = np_["frac_smooth"] if smooth else np_["frac_exact"]
+    span = 360.0 / len(NAKSHATRAS)
+    lon = moon_sidereal_lon % 360.0
+    idx = int(lon / span)
+    frac_elapsed = (lon - idx * span) / span   # 0..1 geçilen kısım
     current_lord = LORDS[idx % 9]              # Ashwini=Ketu ... Revati=Mercury
-    balance = YEARS[current_lord] * (1.0 - frac)
-    return balance, current_lord, current_lord
+    next_lord = LORDS[(idx % 9) + 1 if (idx % 9) + 1 < 9 else 0]
+    balance = YEARS[next_lord] * frac_elapsed
+    return balance, next_lord, current_lord
 
 
-def build_segment(lord: str, sub: str, seg_start: float,
-                  seg_end: float) -> dict:
-    """Tek AD segmenti — TEK KAYNAK.
-
-    `years` = GERÇEK görünür süre (end−start), nominal değil: doğumda
-    kesilen ilk AD'de bu değer kırpık kalandır (ör. 2.7 − 1.95 = 0.75).
-    facts.dasha_tree'in `years` alanı ise sözleşme gereği TAM nominal yıldır;
-    segment süresi her iki yapıta da end−start farkından türetilebilir.
-    """
-    return {"mahadasha": lord, "antardasha": sub,
-            "start_utc": revjul(seg_start, 1),
-            "end_utc": revjul(seg_end, 1),
-            "years": round((seg_end - seg_start) / YEAR, 3)}
-
-
-def antardashas_of_md(moon_sidereal_lon: float, birth_jd_ut: float,
-                      md_index: int = 0, smooth: bool = False) -> list[dict]:
-    """Bir MD'ın TÜM AD'lerini takvimle döndürür (golden PyJHora testi için).
-
-    Sanal başlangıç kuralı `vimshottari` ile birebir aynıdır (tek kaynak:
-    `build_segment` + consumed-shift). md_index=0 → balanca ile açılan ilk
-    MD; tüketilen AD'ler burada da yayınlanmaz, doğumda kesilen AD başlangıcı
-    doğumda olarak görünür.
-    """
-    rem_years, start_lord, _c = balance_years(moon_sidereal_lon, smooth)
+def vimshottari(moon_sidereal_lon: float, birth_jd_ut: float) -> list[dict]:
+    """Doğumdan 120 yıl sonrasına MD+AD takvimi (julian day UT cinsinden)."""
+    import swisseph as swe
+    rem_years, start_lord, _current_lord = balance_years(moon_sidereal_lon)
     lord_i = LORDS.index(start_lord)
-    seq = [LORDS[(lord_i + k) % 9] for k in range(9)]
-    lord = seq[md_index]
-    if md_index == 0:
-        start = birth_jd_ut
-        # consumed = TAM MD yılı − kalan (balance). Eskiden `YEARS[lord] - rem`
-        # yerine ters yazılmıştı; aynı ifade gibi görünse de testte 1.05/2.7
-        # karışıklığından doğan sapma burada netleştirildi (canlı doğrulama:
-        # Ay 199.4667° → Swati pada 4 → frac_exact .75 → balance 4.5 →
-        # consumed 13.5 yıl; Rahu-Venus AD'si doğumda 1.05 yıl kalmış kesilir).
-        consumed_days = (YEARS[lord] - rem_years) * YEAR
-    else:
-        start = birth_jd_ut + rem_years * YEAR \
-            + sum(YEARS[s] for s in seq[1:md_index]) * YEAR
-        consumed_days = 0.0
-    out = []
-    cursor = start - consumed_days          # SANAL başlangıç (doğumdan ÖNCE)
-    for sub in ANTARDASHA_ORDER[lord]:
-        sub_full_days = YEARS[lord] * YEARS[sub] / 120.0 * YEAR
-        seg_start, seg_end = max(cursor, start), cursor + sub_full_days
-        if seg_end > seg_start:
-            out.append(build_segment(lord, sub, seg_start, seg_end))
-        cursor = seg_end
-    return out
-
-
-def vimshottari(moon_sidereal_lon: float, birth_jd_ut: float,
-                smooth: bool = False) -> list[dict]:
-    """Doğumdan itibaren MD+AD takvimi (julian day UT cinsinden).
-
-    Timeline toplamı = 120 − (nakshatrada doğumdan önce tüketilen yıl); ilk MD
-    balanca ile açıldığı için 9 MD'lık döngü tam 120 yıl DEĞİLDİR — normal olan
-    budur. `smooth=True` PyJHora ile birebir derecesel balanca verir.
-    """
-    rem_years, start_lord, _current_lord = balance_years(moon_sidereal_lon, smooth)
-    lord_i = LORDS.index(start_lord)
-    # PyJHora `vimsottari_mahadasa` ile birebir: 9 MD döner; ilki BALANCA
-    # süresiyle açılır (devam eden MD), kalan 8'i tam.
+    md_list = []
+    # PyJHora `vimsottari_mahadasa` ile birebir: 9 MD döner; ilki BALANCA süresiyle
+    # açılır, kalan 8'i tam. (Eski sürümde 10. MD eklenip sonu kırpılıyordu ->
+    # timeline 120 yıl yerine ~137 yıla taşıyordu. Düzeltme: P1-5 regresyon testi.)
     seq = [LORDS[(lord_i + k) % 9] for k in range(9)]
     durations = [rem_years] + [YEARS[s] for s in seq[1:]]
-    md_list = []
     cursor = birth_jd_ut
+    YEAR = 365.2425  # sidereal year (gist/PyJHora: const.sidereal_year)
     for i_md, (lord, yrs) in enumerate(zip(seq, durations)):
         start, end = cursor, cursor + yrs * YEAR
         sub_seq = ANTARDASHA_ORDER[lord]
-        # AD süreleri her zaman MD'ın TAM yılıyla ölçeklenir:
-        #   AD_yrs = YEARS[lord] * YEARS[sub] / 120
-        # İlk MD kırpılmış (balanca) olsa da AD'ler küçülmez. Doğum, devam
-        # eden MD'ın İÇİNDE bir noktadır: tüketilen süre kadar GERİDEKİ sanal
-        # başlangıçtan yürürüz; böylece ne orantılı küçültme ne de clamp
-        # gerekir. Sanal başlangıçta ilk AD tam süresiyle başlar; doğuma
-        # ulaşan ilk AD kısmen tüketilmiş olabilir ve segmenti doğumda kesilir.
-        consumed_days = (YEARS[lord] - yrs) * YEAR if i_md == 0 else 0.0
-        sub_cursor = start - consumed_days     # SANAL başlangıç (doğumdan ÖNCE)
-        for sub in sub_seq:
-            sub_full_days = YEARS[lord] * YEARS[sub] / 120.0 * YEAR  # balancadan bağımsız
-            seg_start = max(sub_cursor, start)   # doğumdan önceki kısım görünmez
-            seg_end = sub_cursor + sub_full_days
-            if seg_end > seg_start:
-                md_list.append(build_segment(lord, sub, seg_start, seg_end))
+        # PyJHora `_vimsottari_bhukti` ile birebir: AD sırası her MD'da MD lorduyla
+        # BAŞLAR (option=1). Balanca kırpması = ilk AD'ın tüketilen kısmı kadar kaydır.
+        first_full = YEARS[lord] * YEARS[sub_seq[0]] / 120.0
+        consumed_frac = 1.0 - yrs / YEARS[lord] if i_md == 0 else 0.0
+        sub_cursor = start + consumed_frac * first_full * YEAR
+        for si, sub in enumerate(sub_seq):
+            sub_yrs = yrs * YEARS[sub] / 120.0
+            seg_end = min(sub_cursor + sub_yrs * YEAR, end)
+            if seg_end > sub_cursor:
+                md_list.append({"mahadasha": lord, "antardasha": sub,
+                                "start_utc": swe.revjul(sub_cursor, 1)[:3],
+                                "end_utc": swe.revjul(seg_end, 1)[:3],
+                                "years": round((seg_end - sub_cursor) / YEAR, 3)})
             sub_cursor = seg_end
         cursor = end
     return md_list
+
+
+def yrs_full(lord: str) -> float:
+    """MD'ın tam (kırpılmamış) yılı — balance hesabında referans."""
+    return YEARS[lord]
