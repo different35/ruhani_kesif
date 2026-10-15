@@ -5,13 +5,11 @@ Prensiplere uyum (bu revizyonda kullanıcı denetim talimatıyla güncellendi):
   Eski ayar FLG_TROPICAL|FLG_NOABERR idi → Contract B sapmaları: Moon +22.3″,
   Venus +22.5″, Mars +16.1″, Mercury −8.5″, Jup +8.6″, Sat +6.5″ (ışık-zamanı
   farkı — sahte kırmızı). Doğru hizalama: swiss FLG_TRUEPOS|FLG_TROPICAL
-  (geometrik, ışık-zamanı YOK) ↔ skyfield at(t) geometrik J2000-mean-ekliptik.
-  Canlı tek-JD sonucu (jd_ut=2460984.5): Sun +0.001″, Moon +1.10″, Merc −0.006″,
-  Ven −0.018″, Mars −0.036″, Jup −0.186″, Sat −0.069″ → hepsi ≤2″ hedefinde.
-  NOT: Çerçeve (J2000-mean vs of-date) burada presesyon-kaplama nedeniyle fark
-  üretmiyor; kullanıcı hipotezinin aksine epoch='date' gerekmiyor (kanıt yukarıda).
-- ΔT HASSASİYETİ (canlı): TT dönüşümünde dt=0 kullanılırsa Moon −42.8″ olur;
-  adapter ts.tt_jd(jd+ΔT) ile doğru yapıyor. Grid bunu korur.
+  (geometrik, ışık-zamanı YOK) ↔ skyfield at(t) geometrik, `ecliptic_frame`
+  (= true ecliptic & equinox of date; J2000 DEĞİL — SPEC-001 kanıtı).
+- ΔT HASSASİYETİ (SPEC-001): UT JD'yi `ts.tt_jd`'ye vermek ΔT'yi düşürür → Moon
+  −36…−41″, Sun −2.7…−2.9″ (bu grid'in 38 kırmızısı). Adapter artık `ts.ut1_jd`
+  kullanıyor; grid bu sözleşmeyi kilitler.
 - ORACLE BELİRSİZLİĞİ (kullanıcı talimatı): Moshier kendi başına ~1–3″ hata taşır
   (Ay daha fazla) → tolerans cisim bazlı: gezegenler 2″, MOON 5″ (oracle belirsizliği
   açıkça yazıldı; DE440-vs-Moshier Ay farkının payı).
@@ -146,15 +144,21 @@ def _skyfield_sunrise(jd_ut, lon, lat):
 
     def alt_tt(tt):
         t = TS.tt_jd(tt)
-        _az, al, _d = (sun.at(t) - obs.at(t)).altaz()
+        # SPEC-001: altaz() sırası (alt, az, distance) — eski `_az, al, _d` açılımı
+        # azimutu irtifa sanıyordu (0..360 ⇒ hiç <0 değil ⇒ doğuş hiç bulunamıyordu).
+        al, _az, _d = (sun.at(t) - obs.at(t)).altaz()
         return float(al.degrees)
 
     # CANLI BULGU (tek-JD kalibrasyon, İstanbul jd=2460984.5): tt_jd'ye verilen sayı
     # TT ölçeğindedir; swiss'in UT-JD'si TT eksenine ΔT (~69 sn) ile ötelenerek
     # köprülenmeli. Doğrudan UT-JD ile örneklersek gün penceresi kayar → bracket bulunamaz.
-    dt = TS.delta_t(jd_ut)  # saniye cinsinden TT-UT
-    tt_center = jd_ut + dt / 86400.0
-    grid = [tt_center - 0.5 + i / 192.0 for i in range(385)]
+    # SPEC-001: `Timescale.delta_t` diye bir API YOK (AttributeError → 18 sahte kırmızı).
+    # UT1→TT köprüsü skyfield'ın kendi ΔT tablosuyla: ut1_jd(jd).tt
+    tt_center = TS.ut1_jd(jd_ut).tt
+    # SPEC-001: swiss rise_trans jd_ut'den SONRAKİ ilk doğuşu döndürür; aynı semantik
+    # için pencere [jd, jd+1] (eski [jd−0.5, jd+0.5] önceki günün doğuşunu yakalıyordu
+    # ⇒ ≈86400 s fark).
+    grid = [tt_center + i / 192.0 for i in range(193)]
     vals = [alt_tt(x) for x in grid]
     br = None
     for i in range(len(grid) - 1):
@@ -171,7 +175,8 @@ def _skyfield_sunrise(jd_ut, lon, lat):
             b = m
         else:
             a, fa = m, fm
-    return TS.tt_jd((a + b) / 2.0).ut1_jd   # UT1 ölçeğine geri dön (talimat: .ut1 kullan)
+    # SPEC-001: `Time.ut1_jd` diye nitelik YOK; JD(UT1) = `Time.ut1`.
+    return float(TS.tt_jd((a + b) / 2.0).ut1)
 
 
 @pytest.mark.parametrize("lat,lo,name", LOCS)

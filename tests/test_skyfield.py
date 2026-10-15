@@ -123,6 +123,26 @@ def test_rahu_mean_node_parity_and_retrograde(sk):
     assert _circ_diff(k, (res_n + 180.0) % 360.0) <= 0.01
 
 
+# ------------------------------------------------------- time scale (SPEC-001) --
+def test_time_scale_contract_float_is_ut1(sk):
+    """SPEC-001 AC-2: float girdi JD(UT1)'dir; TT = UT1 + ΔT (skyfield tablosu).
+    Mutasyon kanıtı: `ut1_jd`→`tt_jd` geri alınırsa bu test ve verify grid kırılır."""
+    t = sk._time(JD2026)
+    assert abs(t.ut1 - JD2026) * 86400.0 < 1e-3
+    dt_s = (t.tt - t.ut1) * 86400.0
+    assert 68.0 < dt_s < 71.0, f"2026 ΔT beklenen ~69.1 s, ölçülen {dt_s:.2f} s"
+
+
+def test_time_scale_contract_datetime_is_utc(sk):
+    """SPEC-001 AC-3: aware datetime UTC'ye çevrilir, naive datetime UTC kabul
+    edilir; aynı an için float JD ile fark |UT1−UTC| < 0.9 s sınırında."""
+    aware = sk._time(J2026)
+    naive = sk._time(J2026.replace(tzinfo=None))
+    ist = sk._time(J2026.astimezone(dt.timezone(dt.timedelta(hours=3))))
+    assert aware.tt == naive.tt == ist.tt
+    assert abs(aware.ut1 - JD2026) * 86400.0 < 0.9
+
+
 # ------------------------------------------------------------------ scope --
 def test_scope_guard_out_of_range_raises(sk):
     old = dt.datetime(1800, 1, 1, tzinfo=UTC)     # de440s ~1849-2150 dışında

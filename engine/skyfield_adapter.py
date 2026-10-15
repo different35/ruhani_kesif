@@ -20,12 +20,14 @@ KAPSAM (bu revizyon — kullanıcı denetim bulguları tek tek canlı doğrulana
   uyumlu) + TÜRETİLMİŞ NEGATİF HIZ (-0.05295 °/gün → is_retrograde daima True).
   true node: kapsam dışı (de440s Ay'ı yok; bkz. house_notes benzeri dürüstlük).
 
-ΔT SÖZLEŞMESİ (canlı doğrulandı, skyfield 1.55): `ts.tt_jd(jd_ut)` UT→TT dönüşümünü
-yerleşik ΔT tablosuyla DOĞRU yapar (J2000'de 63.8 s; 2026'da 69.1 s; 1900'de -2.0 s;
-2050'de 71.7 s). Sabit 64 s yaklaşıklığı yalnızca UTC-JD geri dönüşümünde
-(`_jd_ut`) kalır — hata ≤ ~7 s (≈0.03° GMST, ≈0.05° ASC @ φ=45°, <0.3° @ φ=60°).
-ASC/GMST daima UT1 ölçeğinde değerlendirilir (taslaktaki "ut1 bozuk" teşhisi
-YANLIŞTI; asıl hatalar GMST lineer terimi + quadrant bandıydı — bkz. aşağı).
+ZAMAN ÖLÇEĞİ SÖZLEŞMESİ (SPEC-001 / ADR-001; canlı doğrulandı, skyfield 1.55):
+- Float girdi = **JD(UT1)** (swiss `calc_ut` ile aynı anlam) → `ts.ut1_jd(jd)`.
+  Skyfield ΔT tablosunu kendisi uygular (1901: 9.3 s, 1999: 63.5 s, 2026: 69.1 s).
+- datetime girdi = UTC (naive ⇒ UTC kabul) → `ts.from_datetime` (artık saniye dahil).
+- `ts.tt_jd(x)` girdiyi **TT** kabul eder; UT JD'yi buna vermek ΔT kadar (≈69 s)
+  geç bir anı hesaplar. Önceki revizyondaki "tt_jd UT→TT çevirir" iddiası YANLIŞTI;
+  Ay'da −40″, Güneş'te −2.9″ sistematik sapmanın tek kaynağı buydu (56 test hatası).
+ASC/GMST daima UT1 ölçeğinde değerlendirilir (`time.ut1`).
 
 GMST (IAU/Meeus tam dizisi) + quadrant-fix CANLI DOĞRULAMA (10.800 nokta grid,
 lat ∈ [-60,60], lon ∈ {-120..120}, 0.5 sa adım, 5 epoch; swisseph Placidus ASC'ye
@@ -65,12 +67,6 @@ _BODIES = {
 }
 # Gist §2.1: 9 graha yüzeyi — Rahu/Ketu mean node olarak Ay düğümlerinden türetilir.
 _PLANETS = ["mercury", "venus", "mars", "jupiter", "saturn", "uranus", "neptune", "pluto"]
-
-# Yalnızca JD(UT) -> UTC takvim geri dönüşümünde (`_iso_from_jd`) kullanılan sabit
-# ΔT yaklaşıklığı. İLERİ yönde (UT->TT) kullanılmaz: ts.tt_jd(jd_ut) yerleşik ΔT
-# tablosuyla doğru dönüşüm yapar (canlı: J2000 63.8 s, 2026 69.1 s, 1900 -2.0 s).
-# Sabitin geri dönüşüme etkisi ≤ ~7 s ≈ 0.005 dk — ISO saniye çözünürlüğünde ihmal.
-_UT_TO_TT_DAYS = 64.0 / 86400.0
 
 # de440s resmî kapsamı (JPL sayfası + dosya meta doğrulaması; canlı okuma aşağıda
 # _check_scope ile çalışma zamanında denetlenir). Kapsam dışı tarihlerde açık ValueError.
@@ -201,28 +197,24 @@ class SkyfieldAdapter(EphemerisPort):
                 "(de440s ≈ 1849–2150); daha geniş aralık için de441 sağlayın")
 
     def _time(self, date):
-        """datetime | JD(float, UT ölçeği) -> skyfield Time.
+        """datetime | JD(float, UT1 ölçeği) -> skyfield Time (SPEC-001 sözleşmesi).
 
-        CANLI DOĞRULAMA REVİZYONU (bu oturum): taslaktaki "Time.ut1 bozuk / ΔT
-        sabiti gerekir" teşhisi YANLIŞTI. `ts.tt_jd(jd)` girdiyi **UT** kabul edip
-        yerleşik ΔT tablosuyla TT'ye çevirir (canlı: tt_jd(2461084.0).ut1 farkı
-        69.12 s = 2026 gerçek ΔT; 1900'de -2.0 s; 2050'de 71.7 s). Bu nedenle
-        ileri dönüşümde sabit 64 s KULLANILMAZ; `.ut1` daima sağlıklıdır.
-        Sabit ΔT yalnızca UTC-JD geri dönüşümünde (`_jd_ut`) kalır (≤ ~7 sn hata)."""
+        - float/int: JD(UT1) → `ts.ut1_jd` (ΔT skyfield tablosundan; TT = UT1 + ΔT).
+        - datetime: aware → UTC'ye çevrilir; naive → UTC kabul edilir;
+          `ts.from_datetime` UTC→TT dönüşümünü artık saniyelerle yapar.
+        `ts.tt_jd` burada KULLANILMAZ: girdiyi TT sayar, UT verilirse ΔT kaybolur
+        (regresyon testi: tests/test_skyfield.py::test_time_scale_contract_*)."""
         if isinstance(date, (int, float)):
             jd_ut = float(date)
             self._check_scope(jd_ut)
-            return self._ts.tt_jd(jd_ut)          # ts yerleşik ΔT: UT -> TT doğru
-        if date.tzinfo is not None:
-            date = date.astimezone(_dt.timezone.utc).replace(tzinfo=None)
-        jd = _jd_of(date)
-        self._check_scope(jd)
-        return self._ts.tt_jd(jd)
+            return self._ts.ut1_jd(jd_ut)
+        if date.tzinfo is None:
+            date = date.replace(tzinfo=_dt.timezone.utc)
+        self._check_scope(_jd_of(date))
+        return self._ts.from_datetime(date)
 
     def _jd_ut(self, time) -> float:
-        """skyfield Time -> UT JD. Doğrudan time.ut1 (canlı doğrulandı; eski sabit
-        ΔT geri çevrimi terk edildi — 1900'de ΔT negatif, sabit yaklaşım ±50 sn
-        kayardı)."""
+        """skyfield Time -> JD(UT1). Ayanamsa ve olay zamanları bu ölçekte."""
         return float(time.ut1)
 
     def _node_lon(self, time) -> float:
@@ -253,14 +245,14 @@ class SkyfieldAdapter(EphemerisPort):
           `skyfield.frames` yok); `rel.frame_latlon(frame)` `lat/lon` nitelikleri
           verir — tuple indekslemesi DEĞİL (yanlış okuma sessiz veri hatası olurdu).
         - `ephem['MARS']` KeyError; de440s yalnızca '* BARYCENTER' hedefleri içerir.
-        - Swiss ile sözleşme: geometrik tropik boylam (`FLG_NOABERR` referansı) →
-          7 cisimde |Δ| < 0.007° (test ±0.02° tolerans; golden chart seti P1-10'da
-          daraltılacak). Aberrasyonlu (varsayılan swiss) değerle Güneş'te +0.006°,
-          Merkür'de +0.013° sistematik fark oluşur — geometrik tercih edilmiştir.
-        - EKLIPTİK ÇERÇEVE NOTU (kullanıcı denetimi): ecliptic_frame J2000 Mean
-          Ecliptic'tir; of-date ekliptiğe göre fark presesyon+nutasyon kaynaklı ve
-          2026'da ≤ ~0.013° ölçüldü (canlı: swiss tropical ile karşılaştırma) →
-          ±0.02° test toleransı içinde. Golden testte ayrıca kontrol edilecek.
+        - Swiss ile sözleşme: geometrik tropik boylam = swiss
+          `FLG_TROPICAL|FLG_TRUEPOS` (ışık-zamanı ve aberasyon YOK, nutasyon VAR).
+          SPEC-001 ölçümü (41 epoch × 7 cisim, 1901–2031): Güneş ≤ 0.07″,
+          gezegenler ≤ 0.55″, Ay ≤ 1.98″ (Moshier oracle belirsizliği dahil).
+        - EKLİPTİK ÇERÇEVE (SPEC-001 ile kanıtlandı): `almanac.ecliptic_frame` ==
+          `framelib.ecliptic_frame` = **true ecliptic & equinox of date** (presesyon
+          + nutasyon dahil). Ek matris dönüşümü GEREKMEZ. `ecliptic_J2000_frame`'e
+          geçmek 2026'da −1318″ sapma üretir (kanıt: VERIFICATION.md §2).
         """
         rel = self._bodies[body].at(t) - self._earth.at(t)
         latlon = rel.frame_latlon(_ecliptic_frame)
